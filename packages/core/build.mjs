@@ -26,13 +26,23 @@ for (const f of files) {
     requires.push(`const ${name} = require('${mod}');`);
     return '';
   });
+  // `export * from './x.js'` -> merge require('./x.cjs') into module.exports
+  // (used only by index.ts's barrel re-exports; no named local exports there).
+  const starModules = [];
+  src = src.replace(/^export\s+\*\s+from\s+['"]\.\/([\w.]+?)(?:\.js)?['"];?$/gm, (_m, mod) => {
+    starModules.push(`${mod}.cjs`);
+    return '';
+  });
   const exported = [];
   src = src.replace(/^export\s+(function|const|class)\s+(\w+)/gm, (_m, kind, name) => {
     exported.push(name);
     return `${kind} ${name}`;
   });
   src = src.replace(/^export\s+\{[^}]*\};?$/gm, '');
-  const out = `'use strict';\n${requires.join('\n')}\n${src}\nmodule.exports = { ${exported.join(', ')} };\n`;
+  const exportsExpr = starModules.length
+    ? `Object.assign({ ${exported.join(', ')} }, ${starModules.map((m) => `require('./${m}')`).join(', ')})`
+    : `{ ${exported.join(', ')} }`;
+  const out = `'use strict';\n${requires.join('\n')}\n${src}\nmodule.exports = ${exportsExpr};\n`;
   writeFileSync(join('dist/cjs', f.replace(/\.js$/, '.cjs')), out);
 }
 if (!localNames.has('index')) throw new Error('expected src/index.ts');

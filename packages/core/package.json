@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "build": "node ./build.mjs",
-    "test": "npm run build && node --test \"test/*.test.js\"",
+    "test": "npm run build && node --test \"test/*.test.js\" \"test/*.test.cjs\"",
     "prepare": "npm run build"
   },
   "devDependencies": {
