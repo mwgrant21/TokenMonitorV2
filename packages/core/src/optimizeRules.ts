@@ -1,0 +1,254 @@
+import path from 'node:path';
+import { costForEvent, pricingTierForModel, PRICING_PER_MILLION_TOKENS } from './modelPricing.js';
+import { eventTimestampMs, type TranscriptEvent, type ToolResult, type ToolUse } from './types.js';
+
+const TRIVIAL_OUTPUT_TOKEN_THRESHOLD = 100;
+const REPEATED_READ_THRESHOLD = 3;
+// Cap how many files a single finding enumerates. The rule still counts and
+// costs ALL offending files; it only summarizes the DISPLAY so a machine with
+// dozens of re-read files can't emit a wall-of-text card that dominates the UI.
+const MAX_LISTED_FILES = 3;
+const BASH_OUTPUT_SIZE_THRESHOLD = 5000;
+const PAGINATION_HINTS = /head|tail|select-object|measure-object|-first|-last/i;
+
+export type OptimizeFindingId =
+  | 'opus-on-trivial-turns'
+  | 'unpinned-config-re-reads'
+  | 'uncapped-bash-output'
+  | 'cost-of-thrash';
+
+export interface OptimizeFinding {
+  id: OptimizeFindingId;
+  title: string;
+  detail: string;
+  estSavingsPerWeek: number;
+  fixText: string;
+}
+
+function extrapolateToWeekly(value: number, windowMs: number): number {
+  if (!windowMs) return 0;
+  const weeklyFactor = (7 * 24 * 60 * 60 * 1000) / windowMs;
+  return value * weeklyFactor;
+}
+
+function stringField(input: unknown, field: string): string | undefined {
+  if (typeof input !== 'object' || input === null || !(field in input)) return undefined;
+  const value = (input as Record<string, unknown>)[field];
+  return typeof value === 'string' ? value : undefined;
+}
+
+function toolUses(e: TranscriptEvent): ToolUse[] { return e.toolUses || []; }
+function toolResults(e: TranscriptEvent): ToolResult[] { return e.toolResults || []; }
+
+function findOpusOnTrivialTurns(events: TranscriptEvent[], windowMs: number): OptimizeFinding | null {
+  const trivialOpusEvents = events.filter(
+    (e) => e.kind === 'assistant' && e.usage && pricingTierForModel(e.model) === 'opus'
+      && e.usage.outputTokens < TRIVIAL_OUTPUT_TOKEN_THRESHOLD,
+  );
+  if (trivialOpusEvents.length === 0) return null;
+  const extraCost = trivialOpusEvents.reduce((sum, e) => {
+    const opusCost = costForEvent(e);
+    const sonnetCost = costForEvent({ ...e, model: 'claude-sonnet-4-6' });
+    return sum + (opusCost - sonnetCost);
+  }, 0);
+  return {
+    id: 'opus-on-trivial-turns',
+    title: 'Opus on trivial turns',
+    detail: `${trivialOpusEvents.length} turns used Opus for short (<${TRIVIAL_OUTPUT_TOKEN_THRESHOLD}-token) responses`,
+    estSavingsPerWeek: extrapolateToWeekly(extraCost, windowMs),
+    fixText: 'pin trivial/short turns to Sonnet in CLAUDE.md model guidance',
+  };
+}
+
+function findUnpinnedConfigRereads(events: TranscriptEvent[], windowMs: number): OptimizeFinding | null {
+  const readsByFile = new Map<string, TranscriptEvent[]>();
+  for (const e of events) {
+    if (e.kind !== 'assistant') continue;
+    for (const tu of toolUses(e)) {
+      if (tu.name !== 'Read') continue;
+      const filePath = stringField(tu.input, 'file_path');
+      if (!filePath) continue;
+      if (!readsByFile.has(filePath)) readsByFile.set(filePath, []);
+      readsByFile.get(filePath)!.push(e);
+    }
+  }
+  // Aggregate across ALL offending files into one finding, consistent with the
+  // other rules (which aggregate across every matching instance).
+  const offendingFiles: { filePath: string; count: number }[] = [];
+  let totalWastedCost = 0;
+  for (const [filePath, reads] of readsByFile.entries()) {
+    if (reads.length < REPEATED_READ_THRESHOLD) continue;
+    offendingFiles.push({ filePath, count: reads.length });
+    totalWastedCost += reads.slice(1).reduce((sum, e) => sum + costForEvent(e), 0);
+  }
+  if (offendingFiles.length === 0) return null;
+  // Show only the worst few offenders by re-read count, using basenames so the
+  // card stays one concise line. The total count still reflects every file.
+  // path.win32.basename handles both \ and / so Windows transcripts parse
+  // identically when tests run on posix (CI/sandbox).
+  const ranked = offendingFiles.slice().sort((a, b) => b.count - a.count);
+  const shown = ranked.slice(0, MAX_LISTED_FILES);
+  const moreCount = ranked.length - shown.length;
+  const shownList = shown.map((f) => `${path.win32.basename(f.filePath)} (${f.count}x)`).join(', ');
+  const fileList = moreCount > 0 ? `${shownList}, +${moreCount} more` : shownList;
+  const fixList = shown.map((f) => path.win32.basename(f.filePath)).join(', ');
+  return {
+    id: 'unpinned-config-re-reads',
+    title: 'Unpinned config re-reads',
+    detail: `${offendingFiles.length} file(s) re-read without a cache hit: ${fileList}`,
+    estSavingsPerWeek: extrapolateToWeekly(totalWastedCost, windowMs),
+    fixText: `pin the most re-read files (${fixList}${moreCount > 0 ? ', ...' : ''}) into cached context instead of re-reading`,
+  };
+}
+
+function findUncappedBashOutput(events: TranscriptEvent[], windowMs: number): OptimizeFinding | null {
+  const bashCommandsById = new Map<string, string>();
+  for (const e of events) {
+    if (e.kind !== 'assistant') continue;
+    for (const tu of toolUses(e)) {
+      if (tu.name !== 'Bash') continue;
+      bashCommandsById.set(tu.id, stringField(tu.input, 'command') || '');
+    }
+  }
+  let offendingCount = 0;
+  let wastedChars = 0;
+  for (const e of events) {
+    if (e.kind !== 'user') continue;
+    for (const result of toolResults(e)) {
+      const command = bashCommandsById.get(result.toolUseId);
+      if (command === undefined) continue;
+      // DIVERGENCE RESOLVED HERE. The two copies read different fields:
+      //   Aether      -> result.resultLength   (per tool-result; semantically correct)
+      //   TokenMonitor -> e._rawResultLength   (per EVENT; double-counts when an
+      //                                         event carries more than one result)
+      // Both suites were green because each only ever saw its own shape. Core
+      // prefers the per-result field and falls back to the legacy event-level one
+      // so TokenMonitor keeps working unchanged. Remove the fallback once
+      // TokenMonitor's transcriptParser emits resultLength per tool result.
+      const legacyEventLength = (e as { _rawResultLength?: number })._rawResultLength;
+      const resultLength = result.resultLength ?? legacyEventLength ?? 0;
+      if (resultLength > BASH_OUTPUT_SIZE_THRESHOLD && !PAGINATION_HINTS.test(command)) {
+        offendingCount += 1;
+        wastedChars += resultLength - BASH_OUTPUT_SIZE_THRESHOLD;
+      }
+    }
+  }
+  if (offendingCount === 0) return null;
+  const estimatedWastedTokens = wastedChars / 4; // ~4 chars per token, rough estimate
+  const estimatedCost = (estimatedWastedTokens / 1_000_000) * PRICING_PER_MILLION_TOKENS.sonnet.input;
+  return {
+    id: 'uncapped-bash-output',
+    title: 'Uncapped bash output',
+    detail: `${offendingCount} Bash calls returned over ${BASH_OUTPUT_SIZE_THRESHOLD} chars with no output limiting`,
+    estSavingsPerWeek: extrapolateToWeekly(estimatedCost, windowMs),
+    fixText: 'pipe large commands through head/tail or Select-Object -First',
+  };
+}
+
+// Rough per-extra-call token estimate for a file already read/written once --
+// there is no way to know the file's real size from transcript data alone
+// (Aether's privacy-and-data.md S4: content is never stored), so this mirrors
+// findUncappedBashOutput's existing "rough estimate" precedent.
+const ESTIMATED_TOKENS_PER_REDUNDANT_TOOL_CALL = 500;
+const THRASH_THRESHOLD = 3;
+
+function findCostOfThrash(events: TranscriptEvent[], windowMs: number): OptimizeFinding | null {
+  const readCounts = new Map<string, number>();
+  const writeCounts = new Map<string, number>();
+  const openByToolUseId = new Map<string, { name: string; filePath: string | null }>();
+  for (const e of events) {
+    if (e.kind === 'assistant') {
+      for (const tu of toolUses(e)) {
+        openByToolUseId.set(tu.id, { name: tu.name, filePath: stringField(tu.input, 'file_path') ?? null });
+      }
+    }
+    if (e.kind === 'user') {
+      for (const result of toolResults(e)) {
+        const open = openByToolUseId.get(result.toolUseId);
+        if (!open || !open.filePath) continue;
+        if (open.name === 'Read') readCounts.set(open.filePath, (readCounts.get(open.filePath) ?? 0) + 1);
+        if (open.name === 'Write' || open.name === 'Edit') writeCounts.set(open.filePath, (writeCounts.get(open.filePath) ?? 0) + 1);
+      }
+    }
+  }
+  let redundantCalls = 0;
+  const offendingFiles: string[] = [];
+  for (const [filePath, count] of readCounts.entries()) {
+    if (count >= THRASH_THRESHOLD) { redundantCalls += count - 1; offendingFiles.push(path.win32.basename(filePath)); }
+  }
+  for (const [filePath, count] of writeCounts.entries()) {
+    if (count >= THRASH_THRESHOLD) { redundantCalls += count - 1; offendingFiles.push(path.win32.basename(filePath)); }
+  }
+  if (redundantCalls === 0) return null;
+  const estimatedTokens = redundantCalls * ESTIMATED_TOKENS_PER_REDUNDANT_TOOL_CALL;
+  const estimatedCost = (estimatedTokens / 1_000_000) * PRICING_PER_MILLION_TOKENS.sonnet.input;
+  const listed = offendingFiles.slice(0, MAX_LISTED_FILES).join(', ');
+  const extra = offendingFiles.length > MAX_LISTED_FILES ? ` (+${offendingFiles.length - MAX_LISTED_FILES} more)` : '';
+  return {
+    id: 'cost-of-thrash',
+    title: 'Cost of thrash',
+    detail: `${redundantCalls} redundant read/write calls across ${listed}${extra}`,
+    estSavingsPerWeek: extrapolateToWeekly(estimatedCost, windowMs),
+    fixText: 'cache file contents across turns instead of re-reading/re-writing the same file repeatedly',
+  };
+}
+
+export type OptimizeRule = (events: TranscriptEvent[], windowMs: number) => OptimizeFinding | null;
+
+// Exported: TokenMonitor's copy exported this and its tests reference it directly.
+export const RULES_BY_ID: Record<OptimizeFindingId, OptimizeRule> = {
+  'opus-on-trivial-turns': findOpusOnTrivialTurns,
+  'unpinned-config-re-reads': findUnpinnedConfigRereads,
+  'uncapped-bash-output': findUncappedBashOutput,
+  'cost-of-thrash': findCostOfThrash,
+};
+
+export function evaluateOptimizeRules(events: TranscriptEvent[], windowMs: number): OptimizeFinding[] {
+  return Object.values(RULES_BY_ID)
+    .map((rule) => rule(events, windowMs))
+    .filter((f): f is OptimizeFinding => f !== null);
+}
+
+// Once a finding has been applied (an appliedAtMs is on record for its id), a
+// stale all-time finding would otherwise show forever: these rules scan every
+// event ever recorded, not just the current period, so evidence from before the
+// fix never ages out on its own. Re-run that finding's rule against only the
+// events AFTER appliedAtMs instead:
+//   - no match -> the fix held; drop the finding entirely
+//   - still matches -> genuinely recurring; return the fresh post-fix finding
+//     (accurate detail/estimate from new evidence only) tagged recurring:true
+// Findings with no recorded appliedAtMs (never applied, or applied by someone
+// hand-editing CLAUDE.md outside the Apply-fix action) pass through unchanged.
+export function evaluateOptimizeRulesWithRecurrence(
+  events: TranscriptEvent[],
+  windowMs: number,
+  appliedState: Record<string, number>,
+): (OptimizeFinding & { recurring?: true; appliedAtMs?: number })[] {
+  const state = appliedState || {};
+  return evaluateOptimizeRules(events, windowMs)
+    .map((f) => {
+      const appliedAtMs = state[f.id];
+      if (!Number.isFinite(appliedAtMs)) return f;
+      const rule = RULES_BY_ID[f.id];
+      const recentEvents = events.filter((e) => eventTimestampMs(e) > appliedAtMs!);
+      const recurred = rule ? rule(recentEvents, windowMs) : null;
+      if (!recurred) return null;
+      return { ...recurred, appliedAtMs, recurring: true as const };
+    })
+    .filter((f): f is OptimizeFinding & { recurring: true; appliedAtMs: number } => f !== null);
+}
+
+export interface OptimizeSummary { totalPerWeek: number; grade: 'A' | 'B' | 'C' | 'D'; }
+
+// Summarize findings into a total weekly reclaimable spend and a setup grade.
+// More reclaimable waste = worse grade (an unoptimized setup leaves money on the table).
+export function summarizeOptimize(findings: OptimizeFinding[]): OptimizeSummary {
+  const totalPerWeek = (findings || []).reduce(
+    (sum, f) => sum + (f && Number.isFinite(f.estSavingsPerWeek) ? f.estSavingsPerWeek : 0), 0);
+  let grade: 'A' | 'B' | 'C' | 'D';
+  if (totalPerWeek < 10) grade = 'A';
+  else if (totalPerWeek < 25) grade = 'B';
+  else if (totalPerWeek < 50) grade = 'C';
+  else grade = 'D';
+  return { totalPerWeek, grade };
+}

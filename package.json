@@ -1,0 +1,12 @@
+{
+  "name": "tokenmonitor-v2",
+  "version": "2.0.0-alpha.0",
+  "private": true,
+  "description": "Claude Token Tracker v2 — department build. Shared core logic, version readout, and the v2 design system.",
+  "author": "Matt Grant",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "test": "node --test \"test/*.test.js\" && npm test --workspace @tokenmonitor/core",
+    "build:core": "npm run build --workspace @tokenmonitor/core"
+  }
+}

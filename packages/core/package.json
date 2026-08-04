@@ -1,0 +1,29 @@
+{
+  "name": "@tokenmonitor/core",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pure, dependency-free Claude Code usage logic shared by TokenMonitor and Aether OS. No fs, no Electron, no network.",
+  "type": "module",
+  "main": "./dist/cjs/index.cjs",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/esm/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node ./build.mjs",
+    "test": "npm run build && node --test \"test/*.test.js\"",
+    "prepare": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "typescript": "^5.9.3"
+  }
+}
