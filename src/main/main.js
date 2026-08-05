@@ -14,7 +14,6 @@ const { writeFleetSnapshot } = require('./fleetSnapshotWriter');
 const { loadUiConfig, saveUiConfig } = require('../shared/uiConfig');
 const { seatsChipCounts, teamWaste, deptTotals } = require('../shared/fleetAggregator');
 const { createUsageScraper } = require('./usageScraper');
-const { initAutoUpdate } = require('./autoUpdate');
 
 const UI_CONFIG_PATH = path.join(os.homedir(), '.claude-token-tracker', 'ui.json');
 
@@ -84,7 +83,6 @@ app.whenReady().then(async () => {
   });
 
   const win = createWindow();
-  initAutoUpdate({ app, getMainWindow: () => win });
 
   // Mini/companion mode: sizing + always-on-top are main-process concerns.
   let isMini = false;

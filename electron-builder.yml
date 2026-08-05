@@ -7,15 +7,6 @@ files:
   - src/**/*
   - budgets.default.json
   - node_modules/**/*
-extraResources:
-  - from: secrets/update-token.txt
-    to: update-token.txt
-publish:
-  provider: github
-  owner: mwgrant21
-  repo: TokenMonitor
-  private: true
-  releaseType: release
 win:
   target: nsis
   icon: build/icon.png

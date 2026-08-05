@@ -11,11 +11,9 @@
     "postinstall": "node scripts/grant-appcontainer-acl.js",
     "test": "node --test \"test/*.test.js\" && npm test --workspace @tokenmonitor/core",
     "build:core": "npm run build --workspace @tokenmonitor/core",
-    "dist": "node scripts/dist.js",
-    "release": "node scripts/dist.js --publish"
+    "dist": "node scripts/dist.js"
   },
   "dependencies": {
-    "electron-updater": "^6.8.9",
     "node-pty": "^1.0.0",
     "xterm": "^5.3.0",
     "xterm-addon-fit": "^0.8.0"
