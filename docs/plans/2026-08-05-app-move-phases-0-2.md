@@ -582,7 +582,7 @@ in-progress wiring branch used file:C:/Users/IT/Desktop/... , an absolute
 path containing one machine's home directory that cannot resolve on the
 other two machines.
 
-test/coreContract.test.js asserts all twelve bindings src/ needs are
+test/coreContract.test.js asserts all ten bindings src/ needs are
 exported, so a change inside packages/core fails here rather than at
 runtime in the packaged app."
 ```
@@ -603,7 +603,7 @@ runtime in the packaged app."
 **Interfaces:**
 - Consumes: `@tokenmonitor/core` from Task 3.
 - Produces: no `src/shared/` module named `modelPricing`, `optimizeRules`, `optimizeGrade` or
-  `optimizeActions`. All twelve bindings come from the package.
+  `optimizeActions`. All ten bindings the app imports come from the package.
 
 **Why the four test files are deleted rather than repointed:** `packages/core/test/` already contains
 these exact suites, ported during the extraction (`modelPricing.test.cjs`, `optimizeRules.test.cjs`,
