@@ -200,7 +200,7 @@ Get-Process -Name electron -ErrorAction SilentlyContinue |
   Select-Object Id, MainWindowTitle, @{n='MB';e={[math]::Round($_.WorkingSet64/1MB)}}
 ```
 
-Expected: `RUNNING`, then at least one row with `MainWindowTitle` reading `Claude Token Tracker` and
+Expected: `RUNNING`, then at least one row with `MainWindowTitle` reading `Token Tracker` and
 a non-trivial working set (roughly 150MB+). `EXITED`, no rows, or a row with an empty title all mean
 the renderer failed to mount — report it rather than proceeding. A process that is alive with no
 titled window is the signature of a renderer crash, not a slow start.
@@ -434,7 +434,7 @@ Get-Process -Name electron -ErrorAction SilentlyContinue |
 Stop-Process -Name electron -Force
 ```
 
-Expected: `RUNNING`, then `Claude Token Tracker`. Removing the updater must not affect startup —
+Expected: `RUNNING`, then `Token Tracker`. Removing the updater must not affect startup —
 `initAutoUpdate` was called during window creation, so a mistake here shows up as a failure to
 launch rather than as a subtle bug.
 
@@ -693,7 +693,7 @@ Get-Process -Name electron -ErrorAction SilentlyContinue |
   Where-Object { $_.MainWindowTitle } | Select-Object MainWindowTitle
 ```
 
-Expected: `RUNNING`, then `Claude Token Tracker`. In the running window, confirm the Optimize panel
+Expected: `RUNNING`, then `Token Tracker`. In the running window, confirm the Optimize panel
 renders a setup grade badge and finding cards rather than an empty panel or an error. This is the
 surface that exercises the most package code — `evaluateOptimizeRules`, `gradeBreakdown`,
 `appliedSummary` and `guidanceFor` all feed it — so an empty Optimize panel with a green test suite
@@ -731,7 +731,7 @@ this change exists to end."
 ## Definition of done
 
 - `npm test` green: 32 `test/*.test.js` suites plus the `@tokenmonitor/core` workspace suite.
-- `npm start` launches a window titled `Claude Token Tracker` with all ten panels rendering.
+- `npm start` launches a window titled `Token Tracker` with all ten panels rendering.
 - `grep -rn "electron-updater\|update-token" src/ scripts/ package.json` returns nothing.
 - `grep -rn "require('\./modelPricing')" src/` returns nothing.
 - `node_modules/@tokenmonitor/core` is a symlink to `packages/core`, not a registry download.
