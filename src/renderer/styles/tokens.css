@@ -188,6 +188,67 @@ html[data-pal="carbon"]{
   --tx-muted:#8d8d8d; --tx-dim:#7a7a7a;
   --acc:#4589ff; --acc-deep:#2f6fe0; --acc-ink:#161616;
 }
+/* ---------------------------------------------------------------------------
+   The remaining seven legacy palettes below are translated from v1's
+   ten-variable blocks in src/renderer/dashboard/dashboard.css (read from
+   source, not memory). Ten of thirteen tokens per palette are direct copies
+   of the v1 variable; --tx-secondary, --tx-dim and --acc-deep have no v1
+   source and are derived in the spirit of the midnight/carbon worked
+   examples above: --tx-secondary sits 28% of the way from v1 --dim toward
+   v1 --tx, --tx-dim sits 15% of the way from v1 --dim toward v1 --bg, and
+   --acc-deep is v1 --acc with saturation x0.73 and lightness x0.83 in HSL.
+   All are audited against --flat-panel by test/contrast.test.js.
+   tokyonight is intentionally excluded: it fails WCAG and was cut.
+   --------------------------------------------------------------------------- */
+html[data-pal="slate"]{
+  --bg-base:#12151b; --flat-panel:#1a1f27; --flat-panel2:#222833; --flat-bd:#333b48;
+  --bg-term:#12151b;
+  --tx-primary:#dfe4ea; --tx-body:#dfe4ea; --tx-secondary:#a0a9b5;
+  --tx-muted:#8892a0; --tx-dim:#767f8c;
+  --acc:#7f9cf5; --acc-deep:#5c7ad9; --acc-ink:#12151b;
+}
+html[data-pal="nord"]{
+  --bg-base:#2e3440; --flat-panel:#353c4a; --flat-panel2:#3b4252; --flat-bd:#4c566a;
+  --bg-term:#2e3440;
+  --tx-primary:#eceff4; --tx-body:#eceff4; --tx-secondary:#b7becc;
+  --tx-muted:#a2abbd; --tx-dim:#9199aa;
+  --acc:#88c0d0; --acc-deep:#6ba3b2; --acc-ink:#2e3440;
+}
+html[data-pal="onedark"]{
+  --bg-base:#21252b; --flat-panel:#282c34; --flat-panel2:#2f343d; --flat-bd:#3b4048;
+  --bg-term:#21252b;
+  --tx-primary:#d7dce4; --tx-body:#d7dce4; --tx-secondary:#989da6;
+  --tx-muted:#7f848e; --tx-dim:#71767f;
+  --acc:#61afef; --acc-deep:#4792d0; --acc-ink:#21252b;
+}
+html[data-pal="solarized"]{
+  --bg-base:#002b36; --flat-panel:#073642; --flat-panel2:#0a4552; --flat-bd:#16576a;
+  --bg-term:#002b36;
+  --tx-primary:#eee8d5; --tx-body:#eee8d5; --tx-secondary:#9ca9a3;
+  --tx-muted:#7c918f; --tx-dim:#698282;
+  --acc:#268bd2; --acc-deep:#33709b; --acc-ink:#002b36;
+}
+html[data-pal="catppuccin"]{
+  --bg-base:#1e1e2e; --flat-panel:#181825; --flat-panel2:#313244; --flat-bd:#45475a;
+  --bg-term:#1e1e2e;
+  --tx-primary:#cdd6f4; --tx-body:#cdd6f4; --tx-secondary:#959bb5;
+  --tx-muted:#7f849c; --tx-dim:#70758c;
+  --acc:#89b4fa; --acc-deep:#6191e0; --acc-ink:#1e1e2e;
+}
+html[data-pal="github"]{
+  --bg-base:#0d1117; --flat-panel:#161b22; --flat-panel2:#21262d; --flat-bd:#30363d;
+  --bg-term:#0d1117;
+  --tx-primary:#e6edf3; --tx-body:#e6edf3; --tx-secondary:#9aa2ac;
+  --tx-muted:#7d8590; --tx-dim:#6c747e;
+  --acc:#2f81f7; --acc-deep:#286bcc; --acc-ink:#0d1117;
+}
+html[data-pal="graphite"]{
+  --bg-base:#1c1c1e; --flat-panel:#242426; --flat-panel2:#2d2d30; --flat-bd:#3a3a3d;
+  --bg-term:#1c1c1e;
+  --tx-primary:#ececec; --tx-body:#ececec; --tx-secondary:#a8a8ac;
+  --tx-muted:#8e8e93; --tx-dim:#7d7d81;
+  --acc:#0a84ff; --acc-deep:#1e6ebe; --acc-ink:#1c1c1e;
+}
 
 /* ---------------------------------------------------------------------------
    Compatibility aliases: v1's ten palette variables mapped onto the new names.

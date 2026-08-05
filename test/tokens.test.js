@@ -23,6 +23,20 @@ const TOKENS = [
 
 const AETHER = ['cyan', 'azure', 'violet', 'emerald', 'steel'];
 
+// The nine surviving legacy palettes (tokyonight was cut on WCAG measurement;
+// see test/contrast.test.js). Each is translated from v1's ten-variable block
+// in src/renderer/dashboard/dashboard.css into the flat-language token set.
+const LEGACY = ['midnight', 'slate', 'carbon', 'nord', 'onedark',
+                'solarized', 'catppuccin', 'github', 'graphite'];
+
+// The thirteen flat-language tokens every legacy palette must define,
+// per task-2-brief.md Step 1's mapping table.
+const LEGACY_TOKENS = [
+  'bg-base', 'flat-panel', 'flat-panel2', 'flat-bd', 'bg-term',
+  'tx-primary', 'tx-body', 'tx-muted', 'acc', 'acc-ink',
+  'tx-secondary', 'tx-dim', 'acc-deep',
+];
+
 function blockFor(selector) {
   const i = CSS.indexOf(selector);
   assert.notStrictEqual(i, -1, `selector not found: ${selector}`);
@@ -78,4 +92,15 @@ test('alarm colours are identical across palettes WITHIN each mode', () => {
       `${mode} palettes disagree on alarm colours:\n  ` +
       AETHER.map((p, i) => `${p}: ${signatures[i]}`).join('\n  '));
   }
+});
+
+test('every legacy palette defines the thirteen flat-language tokens', () => {
+  const problems = [];
+  for (const pal of LEGACY) {
+    const body = blockFor(`html[data-pal="${pal}"]`);
+    for (const t of LEGACY_TOKENS) {
+      if (!body.includes(`--${t}:`)) problems.push(`${pal} missing --${t}`);
+    }
+  }
+  assert.deepStrictEqual(problems, []);
 });
