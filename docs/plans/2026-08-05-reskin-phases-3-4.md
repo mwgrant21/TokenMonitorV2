@@ -144,16 +144,37 @@ test('every Aether palette defines a full colour set in both modes', () => {
   assert.deepStrictEqual(problems, []);
 });
 
-test('alarm colours are identical across every palette', () => {
-  // An alert must mean the same thing on every desk. Only the accent changes.
-  const offenders = AETHER.flatMap((pal) => ['dark', 'light'].map((mode) => {
-    const body = blockFor(`html[data-pal="${pal}"][data-mode="${mode}"]`);
-    return ['success', 'warn', 'danger'].some((t) => body.includes(`--${t}:`))
-      ? `${pal}/${mode} overrides an alarm colour` : null;
-  })).filter(Boolean);
-  assert.deepStrictEqual(offenders, []);
+function token(body, name) {
+  const m = new RegExp(`--${name}\\s*:\\s*([^;]+);`).exec(body);
+  return m ? m[1].trim() : null;
+}
+
+test('alarm colours are identical across palettes WITHIN each mode', () => {
+  // "An alert must mean the same thing on every desk" binds across PALETTES.
+  // It does not bind across modes: every light palette legitimately overrides
+  // the dark defaults, because #3be0a0 on a light panel fails contrast. What
+  // must never happen is cyan and steel disagreeing inside the same mode.
+  for (const mode of ['dark', 'light']) {
+    const signatures = AETHER.map((pal) => {
+      const body = blockFor(`html[data-pal="${pal}"][data-mode="${mode}"]`);
+      // 'inherit' means the block does not override, i.e. it takes :root's value.
+      return ['success', 'warn', 'danger']
+        .map((t) => token(body, t) ?? 'inherit').join(' | ');
+    });
+    const distinct = [...new Set(signatures)];
+    assert.strictEqual(distinct.length, 1,
+      `${mode} palettes disagree on alarm colours:\n  ` +
+      AETHER.map((p, i) => `${p}: ${signatures[i]}`).join('\n  '));
+  }
 });
 ```
+
+**Why this shape.** An earlier draft asserted that no palette may declare an alarm colour at all.
+That is wrong against the prototype: all five dark palettes inherit `:root`
+(`#3be0a0 / #f5c66b / #ff6b7a`), while all five light palettes deliberately override with
+`#0f7f55 / #96660f / #b3283a`. The rule the spec states is about palettes, not modes, and this
+version enforces exactly that — it still fails if cyan's red drifts from steel's, and now also
+catches one light palette's warn drifting from the other four.
 
 - [ ] **Step 2: Run it and watch it fail**
 
