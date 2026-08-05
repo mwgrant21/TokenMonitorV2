@@ -2,7 +2,7 @@
 // Pure history analytics over parsed transcript events (the normalized shape
 // from transcriptParser). Consumes the RAW event array - not UsageAggregator,
 // which drops cwd/sessionId on ingest. No fs, no Electron - unit-testable.
-const { costForEvent, pricingTierForModel } = require('./modelPricing');
+const { costForEvent, pricingTierForModel } = require('@tokenmonitor/core');
 const { isCorrection } = require('./aggregator');
 
 const HOUR_MS = 60 * 60 * 1000;

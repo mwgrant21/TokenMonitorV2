@@ -2,7 +2,7 @@
 const fsp = require('node:fs/promises');
 const path = require('node:path');
 const { buildTaskBreakdown } = require('../shared/taskClassifier');
-const { evaluateOptimizeRules } = require('../shared/optimizeRules');
+const { evaluateOptimizeRules } = require('@tokenmonitor/core');
 
 async function writeFleetSnapshot({ folderPath, username, liveAggregator, historyAggregator, historyEvents }) {
   const weekMs = 7 * 24 * 60 * 60 * 1000;

@@ -3,7 +3,7 @@ const { ipcMain } = require('electron');
 const fsp = require('node:fs/promises');
 const path = require('node:path');
 const os = require('node:os');
-const { guidanceFor, upsertGuidance } = require('../shared/optimizeActions');
+const { guidanceFor, upsertGuidance } = require('@tokenmonitor/core');
 const { recordAppliedAt } = require('../shared/optimizeState');
 
 function globalTargetPath() {

@@ -2,7 +2,7 @@
 // Pure report builders for the export modal. No fs, no Electron.
 const { buildTaskBreakdown } = require('./taskClassifier');
 const { eventTime, usageTokens, sessionHistory, modelSplit } = require('./historyAggregator');
-const { costForEvent } = require('./modelPricing');
+const { costForEvent } = require('@tokenmonitor/core');
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const SCOPE_TO_MS = { day: DAY_MS, week: 7 * DAY_MS, month: 30 * DAY_MS };

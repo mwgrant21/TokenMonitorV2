@@ -1,4 +1,4 @@
-const { costForEvent } = require('./modelPricing');
+const { costForEvent } = require('@tokenmonitor/core');
 
 const CORRECTION_MARKERS = ['no,', 'wrong', 'fix', 'actually', 'revert', "that's not", 'undo'];
 

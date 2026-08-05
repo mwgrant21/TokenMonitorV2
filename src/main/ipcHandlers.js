@@ -6,9 +6,11 @@ const fsp = require('node:fs/promises');
 const { writeReport } = require('./reportWriter');
 const { buildReportData, buildCsvReport, buildMarkdownReport, reportFileName, KNOWN_SCOPES } = require('../shared/exportReport');
 const { buildTaskBreakdown } = require('../shared/taskClassifier');
-const { evaluateOptimizeRules, evaluateOptimizeRulesWithRecurrence, summarizeOptimize } = require('../shared/optimizeRules');
-const { gradeBreakdown, appliedSummary } = require('../shared/optimizeGrade');
-const { guidanceFor, isGuidanceApplied } = require('../shared/optimizeActions');
+const {
+  evaluateOptimizeRules, evaluateOptimizeRulesWithRecurrence, summarizeOptimize,
+  gradeBreakdown, appliedSummary,
+  guidanceFor, isGuidanceApplied,
+} = require('@tokenmonitor/core');
 const { loadOptimizeState } = require('../shared/optimizeState');
 const { loadBudgetConfig, saveBudgetConfig } = require('../shared/budgetConfig');
 const { deriveBudgetsFromMonthly } = require('../shared/budgetDerive');
