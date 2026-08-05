@@ -4,9 +4,24 @@
   "private": true,
   "description": "Claude Token Tracker v2 — department build. Shared core logic, version readout, and the v2 design system.",
   "author": "Matt Grant",
+  "main": "src/main/main.js",
   "workspaces": ["packages/*"],
   "scripts": {
+    "start": "electron .",
+    "postinstall": "node scripts/grant-appcontainer-acl.js",
     "test": "node --test \"test/*.test.js\" && npm test --workspace @tokenmonitor/core",
-    "build:core": "npm run build --workspace @tokenmonitor/core"
+    "build:core": "npm run build --workspace @tokenmonitor/core",
+    "dist": "node scripts/dist.js",
+    "release": "node scripts/dist.js --publish"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9",
+    "node-pty": "^1.0.0",
+    "xterm": "^5.3.0",
+    "xterm-addon-fit": "^0.8.0"
+  },
+  "devDependencies": {
+    "electron": "^43.0.0",
+    "electron-builder": "^26.15.3"
   }
 }

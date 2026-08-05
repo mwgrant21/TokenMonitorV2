@@ -1,0 +1,84 @@
+Windows PowerShell 5.1
+Copyright (C) Microsoft Corporation. All rights reserved.Install the latest PowerShell for new features and improvements! https://aka.ms/PSWindowsPS C:\Users\Matt\.local\bin> claude
+[>0q
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ▐▛███▜▌Claude Codev2.1.207
+▝▜█████▛▘Fable 5 · Claude Max
+  ▘▘ ▝▝  ~\.local\bin● high · /effort
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────❯ Try "how does <filepath> work?"
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────⏸ manual mode on● high · /effort
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────❯ Try "how does <filepath> work?"
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  Microsoft Windows [Version 10.0.26100.8737]                                                                             (c) Microsoft Corporation. All rights reserved.
+  C:\Users\Matt\.local\bin>{"session_id":"41287e3f-326f-448b-8721-db57d4c77ba1","transcript_path":"C:\\Users\\Matt\\.c… C:\Users\Matt\.local\bin>  ⎿  SessionStart:startup hook error
+  ⎿  Hook JSON output validation failed — (root): Invalid input▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔SettingsStatusConfig Usage StatsSessionTotal cost:            $0.0000Total duration (API):  0sTotal duration (wall): 13sTotal code changes:    0 lines added, 0 lines removedUsage:                 0 input, 0 output, 0 cache read, 0 cache writeCurrent session██████████████████████▌45%usedResets 1:20am (America/Denver)Current week (all models)███████████████████▌39%usedResets Jul 11, 7pm (America/Denver)   What's contributing to your limits usage?                                                                              Approximate, based on local sessions on this machine — does not include other devices or claude.ai
+                                                                                                                         Sanninglocal essions…                                                                                             
+ Refrshing…                                                                                                          
+ Esc to cancl▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔SettingsStatusConfig Usage StatsSession   Total cost:            $0.0000                                                                                       Total duration (API):  0sTotal duration (wall): 13sTotal code changes:    0 lines added, 0 lines removedUsage:                 0 input, 0 output, 0 cache read, 0 cache write
+Current session███████████████████████46%usedResets 1:19am (America/Denver)
+Current week (all models)████████████████████40%usedResets Jul 11, 6:59pm (America/Denver)
+Current week (Fable)███████████████████████████████▌63%usedResets Jul 11, 6:59pm (America/Denver)
+What's contributing to your limits usage?Approximate, based on local sessions on this machine — does not include other devices or claude.ai
+Scanning local sessions…                                                                                                                     Usage creditsUsag credits are off · /usage-credits to turn them on▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔   Settings  Status   Config Usage Stats   Session
+Total cost:            $0.0000
+   Total duration (API):  0s                                                                                            Total duration (wall): 13sTotal code changes:    0 lines added, 0 lines removedUsage:                 0 input, 0 output, 0 cache read, 0 cache writeCurrent session                                                                                                      ███████████████████████46%usedResets 1:19am (America/Denver)
+Current week (all models)████████████████████40%usedResets Jul 11, 6:59pm (America/Denver)
+Current week (Fable)███████████████████████████████▌63%usedResets Jul 11, 6:59pm (America/Denver)
+What's contributing to your limits usage?Approximate, based on local sessions on this machine — does not include other devices or claude.ai
+Last 24h · these are independent characteristics of your usage, not a breakdown
+98%ofyourusagecamefromsubagent-heavysessions Each subagent runs its own requests. Be deliberate about spawning them — and  consider configuringa heapr mdel for simpler subagent.                                                         75% of your usage was at>150kcontextLonger sessions are more expensive even when cached. /compact mid-task, /clear  when switching to new tasks.                                                                                                                     18%ofyourusagecamefromsubagentsunder"general-purpose" Ifhis runs frequently, consider configuring its subagents with a cheaper ↓▝▜█████▛▘  Fable 5 · Claude Max                                                                                           ▘▘ ▝▝    ~\.local\bin  ⎿  SessionStart:startup hook error
+  ⎿  Hook JSON output validation failed — (root): Invalid input
+                                                                                                                     
+
+                                                                                                                     
+
+
+
+
+
+● high · /effort
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────❯ 
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────Microsoft Windw[Vrsion10.0.26100.8737]                                                                           (c) Microsoft Corpration. All rights reserved.C:\Users\Matt\.local\bin>{"session_id":"41287e3f-326f-448b-8721-db57d4c77ba1","transcript_path":"C:\\Users\\Matt\\.c…C:\Users\Matt\.local\bin>⏸ manual mode on
+                                                                                                                        
+
+                                                                                                                        ● high · /effort
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────❯                                                                                                                       ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────Press Ctrl-D again to exit● high · /effort
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────❯ 
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────Microsoft Windows [Version 10.0.26100.8737]                   (c) Microsoft Corporation. All rights reserved.                                                                         C:\Users\Matt\.local\bin>{"session_id":"41287e3f-326f-448b-8721-db57d4c77ba1","transcript_path":"C:\\Users\\Matt\\.c…
+  C:\Users\Matt\.local\bin>                                                                                             ⏸ manual mode on

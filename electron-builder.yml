@@ -1,0 +1,29 @@
+appId: com.mwgrant21.claude-token-tracker
+productName: Claude Token Tracker
+npmRebuild: false
+directories:
+  output: dist
+files:
+  - src/**/*
+  - budgets.default.json
+  - node_modules/**/*
+extraResources:
+  - from: secrets/update-token.txt
+    to: update-token.txt
+publish:
+  provider: github
+  owner: mwgrant21
+  repo: TokenMonitor
+  private: true
+  releaseType: release
+win:
+  target: nsis
+  icon: build/icon.png
+  signtoolOptions:
+    certificateFile: codesign/tokentracker-codesign.pfx
+    signingHashAlgorithms: ["sha256"]
+    publisherName: "Matt Grant"
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  include: build/installer.nsh

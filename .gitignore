@@ -3,3 +3,7 @@ dist/
 out/
 *.tsbuildinfo
 .env
+.worktrees/
+*.log
+codesign/
+secrets/

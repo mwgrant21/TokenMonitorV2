@@ -1,0 +1,6 @@
+{
+  "session": { "tokens": 2000000 },
+  "day": { "tokens": 15000000 },
+  "week": { "tokens": 60000000 },
+  "month": { "tokens": 200000000 }
+}

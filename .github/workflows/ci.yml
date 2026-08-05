@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test:
+    # Windows is the packaged target; node-pty and the AppContainer ACL
+    # postinstall are exercised on the same platform users run.
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        # 22+ required: `node --test` glob patterns need Node 21+, and
+        # node-abi (node-pty prebuild resolution) requires >= 22.12.
+        node-version: ['22.x', '24.x']
+    env:
+      # electron-builder is only needed for packaging, never in CI.
+      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+      - run: npm ci
+      - run: npm test

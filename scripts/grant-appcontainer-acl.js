@@ -1,0 +1,42 @@
+// scripts/grant-appcontainer-acl.js
+//
+// Electron's GPU and renderer children run inside a Windows AppContainer sandbox.
+// An AppContainer token can only map DLLs from a directory that grants read+execute
+// to ALL APPLICATION PACKAGES (S-1-15-2-1). npm does not set that ACE, so on machines
+// where it is not inherited from a parent directory the sandboxed children fail to
+// load their DLLs and exit with 0xC0000135 (STATUS_DLL_NOT_FOUND). Electron reports
+// this as:
+//
+//   GPU process exited unexpectedly: exit_code=-1073741515
+//   FATAL: GPU process isn't usable. Goodbye.
+//
+// npm install recreates node_modules and drops the ACE, so this runs on postinstall.
+// Chrome ships with this ACE on its own install directory for the same reason.
+
+const { execFileSync } = require('node:child_process');
+const fs = require('node:fs');
+const path = require('node:path');
+
+// The ACE is a Windows concept; nothing to do elsewhere.
+if (process.platform !== 'win32') process.exit(0);
+
+const distDir = path.join(__dirname, '..', 'node_modules', 'electron', 'dist');
+
+if (!fs.existsSync(distDir)) {
+  console.log(`[acl] skipped: ${distDir} not present`);
+  process.exit(0);
+}
+
+try {
+  execFileSync(
+    'icacls',
+    [distDir, '/grant', '*S-1-15-2-1:(OI)(CI)(RX)', '/T', '/C'],
+    { stdio: 'pipe' },
+  );
+  console.log('[acl] granted ALL APPLICATION PACKAGES (RX) on electron/dist');
+} catch (err) {
+  // A failure here only means the app may not launch; it must not break `npm install`.
+  console.warn(`[acl] WARNING: could not grant the AppContainer ACE: ${err.message}`);
+  console.warn('[acl] If Electron dies with exit_code=-1073741515, run manually:');
+  console.warn(`[acl]   icacls "${distDir}" /grant "*S-1-15-2-1:(OI)(CI)(RX)" /T /C`);
+}
