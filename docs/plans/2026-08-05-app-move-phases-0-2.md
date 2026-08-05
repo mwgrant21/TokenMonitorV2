@@ -208,7 +208,8 @@ titled window is the signature of a renderer crash, not a slow start.
 Close it:
 
 ```powershell
-Stop-Process -Name electron -Force
+Get-Process -Name electron -ErrorAction SilentlyContinue |
+  Where-Object { $_.Path -like "*TokenMonitorV2*" } | Stop-Process -Force
 ```
 
 - [ ] **Step 9: Commit**
@@ -431,7 +432,8 @@ Start-Sleep -Seconds 12
 if ($p.HasExited) { "EXITED code $($p.ExitCode)" } else { "RUNNING" }
 Get-Process -Name electron -ErrorAction SilentlyContinue |
   Where-Object { $_.MainWindowTitle } | Select-Object MainWindowTitle
-Stop-Process -Name electron -Force
+Get-Process -Name electron -ErrorAction SilentlyContinue |
+  Where-Object { $_.Path -like "*TokenMonitorV2*" } | Stop-Process -Force
 ```
 
 Expected: `RUNNING`, then `Token Tracker`. Removing the updater must not affect startup —
@@ -702,7 +704,8 @@ means the wiring is wrong somewhere the tests do not reach.
 Then:
 
 ```powershell
-Stop-Process -Name electron -Force
+Get-Process -Name electron -ErrorAction SilentlyContinue |
+  Where-Object { $_.Path -like "*TokenMonitorV2*" } | Stop-Process -Force
 ```
 
 - [ ] **Step 6: Commit**
