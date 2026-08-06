@@ -90,6 +90,63 @@ survive contact with the code it describes.
   with an opaque `Cannot find module` instead of rebuilding. Swapping the two halves
   makes it self-healing.
 
+Opened 2026-08-06 while executing reskin Task 3
+([plan](plans/2026-08-05-reskin-phases-3-4.md)).
+
+## 5. The compatibility alias layer is inert — the reskin is not reaching dashboard.css
+
+**Status:** open. Closes in Task 4 under the resequenced order (5 -> 6 -> 4).
+
+Task 1 added an alias block at `src/renderer/styles/tokens.css:258` mapping v1's ten
+variables onto the Aether tokens (`--bg: var(--bg-base)`, and so on) so that "every
+existing rule in dashboard.css resolves through these unchanged." It does not.
+
+`src/renderer/dashboard/dashboard.css:2-4` still declares the same variables as
+literals, at identical `:root` specificity, and `src/renderer/index.html` links
+`dashboard.css` *after* `tokens.css`. Later wins. Measured in a real Chromium context
+with `data-pal="steel"` active, not inferred from the cascade:
+
+| token | value |
+|---|---|
+| `--bg-base` (steel dark, tokens.css) | `#0a0c0d` |
+| `--bg` (alias, should follow it) | `#0b0e14` |
+| resolved `var(--bg)` | `rgb(11, 14, 20)` |
+
+So every rule referencing `--bg`, `--panel`, `--panel2`, `--bd`, `--tx`, `--dim`,
+`--soft` or `--acc2` paints v1 Midnight in all nineteen palettes. The palette-specific
+tokens (`--acc`, `--tx-primary`, `--bg-base`) do land, because their blocks are
+`html[data-pal][data-mode]` and outrank `:root` — which is why the app looks *partly*
+restyled and hides the problem.
+
+**This is why "the app still looks like v1" is not only unstyled chrome.** Tasks 1 and 2
+are real work that is currently invisible below the token layer.
+
+**Fix:** delete dashboard.css's `:root` literal block along with its nine
+`[data-palette]` blocks. Not safe before Task 6 — see item 6 for why.
+
+## 6. Tokyo Night is still selectable, having been cut for failing WCAG
+
+**Status:** open. Live accessibility issue, not cosmetic. Closes in Task 4.
+
+Task 2 cut `tokyonight` on measured contrast failure (`tx-muted` 2.76:1, `tx-dim`
+2.31:1) and `test/contrast.test.js` enforces its absence. From `tokens.css` only.
+
+`src/renderer/dashboard/panels/settingsPanel.js:18` still lists it, and
+`src/renderer/dashboard/dashboard.css:26` still defines it, so it remains a working,
+user-selectable palette. The test binds the new layer while the old layer serves the
+users.
+
+**Root cause worth remembering, shared with item 5:** a new layer was added beside an
+old one that was never removed, and the tests only bind the new layer. Green suite,
+unchanged behaviour. Same class as item 1 — a correct rule whose input never arrives.
+Adding a layer is not migrating to it; the migration is the deletion.
+
+**Why neither can be fixed yet:** `data-palette` is the live switch
+(`settingsPanel.js:42`, restored at `index.html:196`), while `data-pal`/`data-mode` are
+static attributes on `<html>` that nothing ever writes. Deleting the legacy blocks
+before Task 6 rebuilds the control would leave palette switching doing nothing at all.
+Hence the resequence to 5 -> 6 -> 4 agreed 2026-08-06.
+
 ---
 
 ## Not a code issue: rotate the deployed update token
