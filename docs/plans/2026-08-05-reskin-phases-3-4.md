@@ -549,13 +549,25 @@ Launch the app (PowerShell pattern from Task 1 Step 7). Open DevTools with `Ctrl
 console:
 
 ```js
-document.fonts.check('700 12px Rajdhani')      // expect true
-document.fonts.check('400 12px "Space Mono"')  // expect true
+await document.fonts.load('700 12px Rajdhani')      // expect a non-empty array
+await document.fonts.load('400 12px "Space Mono"')  // expect a non-empty array
 ```
 
-`false` means the `@font-face` src path is wrong relative to `styles/`. The Network tab will show the
-404. **Do not accept "it looks different" as proof the fonts loaded** — the fallback chain
-(Bahnschrift, Segoe UI) also changes the look, which is exactly how a font 404 hides.
+**Corrected 2026-08-06, after this step was executed.** This step originally called for
+`document.fonts.check(spec)` expecting `true`, and read `false` as a wrong src path. That criterion
+is not sound: `check()` never triggers a fetch, so it returns `false` for a perfectly correct
+`@font-face` that nothing has demanded yet. Executing the step as written returned `false` for all
+six faces with **zero failed network requests** and every face registered as `unloaded` — a false
+alarm that, taken at face value, would have meant rewriting correct paths. `load()` forces the fetch,
+so its result is real evidence; an empty array or a rejection is the genuine signal that the src is
+wrong relative to `styles/`, and the Network tab will show the 404.
+
+**Do not accept "it looks different" as proof the fonts loaded** — the fallback chain (Bahnschrift,
+Segoe UI) also changes the look, which is exactly how a font 404 hides.
+
+The manual DevTools pass is now a spot-check, not the gate. `test/fonts.test.js` is the gate: it
+asserts every `@font-face` src resolves to a real non-empty file carrying the `wOF2` signature, that
+`fonts.css` is linked before `tokens.css`, and that no url points at `node_modules` or a CDN.
 
 - [ ] **Step 5: Commit**
 
