@@ -112,7 +112,12 @@
   function renderObSwatches() {
     const grid = document.getElementById('ob-swatch-grid');
     if (!grid || typeof THEME_PALETTES === 'undefined') return;
-    const active = document.documentElement.dataset.palette || 'midnight';
+    // THEME_PALETTES starts with empty colours and is filled from the CSS on first
+    // use. Boot mounts settings before onboarding today, but relying on that ordering
+    // would paint blank chips the moment it changed - an empty colour renders as a
+    // transparent chip that looks plausible rather than broken.
+    if (typeof ensureSwatchColours === 'function') ensureSwatchColours();
+    const active = document.documentElement.dataset.pal || 'steel';
     grid.innerHTML = THEME_PALETTES.map((p) => `
       <button type="button" class="swatch-btn" data-slug="${esc(p.slug)}" title="${esc(p.label)}"
         style="display:flex;flex-direction:column;align-items:center;gap:4px;background:transparent;border:none;padding:2px;cursor:pointer">
@@ -281,5 +286,7 @@
     } catch (e) { /* config unavailable; do not block the app */ }
   }
 
-  window.TT.onboarding = { mount, open, isOpen: () => state.open };
+  // renderSwatches is exported so settingsPanel's applyTheme() can repaint this
+  // grid too - its chip colours come from the CSS and go stale on a mode change.
+  window.TT.onboarding = { mount, open, isOpen: () => state.open, renderSwatches: renderObSwatches };
 })();

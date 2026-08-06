@@ -165,7 +165,11 @@ function registerIpcHandlers({ liveAggregator, getHistoryEvents, getHistoryAggre
     // flags as Trap 1, one level up in the call chain.
     const incomingMode = payload && payload.mode;
     const mode = KNOWN_MODES.includes(incomingMode) ? incomingMode : current.mode;
-    return saveThemeConfig(themeConfigPath, { theme, mode });
+    await saveThemeConfig(themeConfigPath, { theme, mode });
+    // Return the resolved state so the renderer can reconcile: an invalid slug is
+    // coerced here, and without the response the UI would keep showing a palette
+    // that was never persisted.
+    return loadThemeConfig(themeConfigPath);
   });
 
   ipcMain.handle('panels:get', () => loadPanelsConfig(panelsConfigPath));

@@ -33,6 +33,8 @@
         </div>
         <div class="hero-label" style="margin-bottom:8px">Appearance - theme</div>
         <div id="swatch-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
+        <div class="hero-label" style="margin:12px 0 6px">Appearance - mode</div>
+        <div id="mode-seg" style="display:flex;gap:2px;background:var(--panel);border:1px solid var(--bd);border-radius:6px;padding:2px"></div>
         <div style="height:1px;background:var(--bd);margin:14px 0"></div>
         <div class="hero-label" style="margin-bottom:2px">Budget thresholds (tokens)</div>
         <div id="budget-form"></div>
@@ -193,8 +195,14 @@
       // and there is no flash. midnight stays the :root default on failure.
       try {
         const stored = await window.tokenTracker.theme.get();
-        if (stored && stored.theme) document.documentElement.dataset.palette = stored.theme;
-      } catch (e) { /* keep :root (midnight) default */ }
+        if (stored && stored.theme) {
+          // All three axes, not just the palette. lang is derived by the main process
+          // from the palette, so it can never disagree with the palette it describes.
+          document.documentElement.dataset.pal = stored.theme;
+          document.documentElement.dataset.mode = stored.mode || 'dark';
+          document.documentElement.dataset.lang = stored.lang || 'aether';
+        }
+      } catch (e) { /* keep the steel/dark defaults already on <html> */ }
 
       try {
         const ui = await window.tokenTracker.ui.get();

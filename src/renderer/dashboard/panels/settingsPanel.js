@@ -4,27 +4,107 @@
 // shortcuts.js call closeSettings/toggleSettings/selectPalette and read
 // THEME_PALETTES as globals, and index.html boot calls mountSettings().
 
-// Theme palettes (slug, label, --bg, --acc) mirrored from the theme-picker spec
-// table. Slugs MUST match dashboard.css [data-palette] blocks and themeConfig
-// KNOWN_PALETTES. The CSS palette is the source of truth for the full color set;
-// only --bg/--acc are duplicated here to paint the swatch chips.
-const THEME_PALETTES = [
-  { slug: 'midnight', label: 'Midnight', bg: '#0b0e14', acc: '#5b8cff' },
-  { slug: 'slate', label: 'Slate', bg: '#12151b', acc: '#7f9cf5' },
-  { slug: 'carbon', label: 'Carbon', bg: '#161616', acc: '#4589ff' },
-  { slug: 'nord', label: 'Nord', bg: '#2e3440', acc: '#88c0d0' },
-  { slug: 'onedark', label: 'One Dark', bg: '#21252b', acc: '#61afef' },
-  { slug: 'solarized', label: 'Solarized', bg: '#002b36', acc: '#268bd2' },
-  { slug: 'tokyonight', label: 'Tokyo Night', bg: '#1a1b26', acc: '#7aa2f7' },
-  { slug: 'catppuccin', label: 'Catppuccin', bg: '#1e1e2e', acc: '#89b4fa' },
-  { slug: 'github', label: 'GitHub', bg: '#0d1117', acc: '#2f81f7' },
-  { slug: 'graphite', label: 'Graphite', bg: '#1c1c1e', acc: '#0a84ff' },
+// Slug and display label only. 14 slugs, not 19: the spec's 19 counts palette
+// VARIANTS - the five Aether slugs exist in both modes (5 x 2) plus nine single-mode
+// legacy slugs. Mode is the segmented control below, so it must not also be a row here.
+//
+// Colours are deliberately absent. v1 re-declared each palette's --bg and --acc as JS
+// literals with a comment admitting the CSS was the real source of truth; that is a
+// second copy that can disagree with tokens.css and render a swatch misrepresenting
+// the palette it selects. readSwatches() reads them from the CSS instead.
+// test/settingsPalettes.test.js holds this list to themeConfig's KNOWN_PALETTES.
+const THEME_PALETTE_LABELS = [
+  { slug: 'cyan', label: 'Cyan' },
+  { slug: 'azure', label: 'Azure' },
+  { slug: 'violet', label: 'Violet' },
+  { slug: 'emerald', label: 'Emerald' },
+  { slug: 'steel', label: 'Steel' },
+  { slug: 'midnight', label: 'Midnight' },
+  { slug: 'slate', label: 'Slate' },
+  { slug: 'carbon', label: 'Carbon' },
+  { slug: 'nord', label: 'Nord' },
+  { slug: 'onedark', label: 'One Dark' },
+  { slug: 'solarized', label: 'Solarized' },
+  { slug: 'catppuccin', label: 'Catppuccin' },
+  { slug: 'github', label: 'GitHub' },
+  { slug: 'graphite', label: 'Graphite' },
 ];
+
+// The five palettes that carry the Aether visual language. Legacy palettes are flat.
+// This mirrors themeConfig.AETHER_PALETTES; the same test pins them together.
+const AETHER_SLUGS = ['cyan', 'azure', 'violet', 'emerald', 'steel'];
+
+const DEFAULT_PALETTE = 'steel';
+const DEFAULT_MODE = 'dark';
+
+// lang is derived from the palette, never stored, so the two can never disagree.
+function langFor(slug) {
+  return AETHER_SLUGS.includes(slug) ? 'aether' : 'flat';
+}
+
+function currentPalette() {
+  return document.documentElement.dataset.pal || DEFAULT_PALETTE;
+}
+
+function currentMode() {
+  return document.documentElement.dataset.mode || DEFAULT_MODE;
+}
+
+// Read each palette's swatch colours from the CSS itself, so the grid can never
+// disagree with tokens.css.
+//
+// The attribute MUST go on document.documentElement: tokens.css selectors are
+// html[data-pal="..."], so a detached probe element matches nothing and every value
+// comes back empty - which renders as a transparent chip that looks plausible against
+// a dark panel. Mutating the live root in a loop is safe because the browser does not
+// paint mid-task, and the attributes are restored before returning.
+function readSwatches(slugs) {
+  const root = document.documentElement;
+  const prevPal = root.getAttribute('data-pal');
+  const prevMode = root.getAttribute('data-mode');
+  const out = {};
+  for (const slug of slugs) {
+    root.setAttribute('data-pal', slug);
+    const cs = getComputedStyle(root);
+    out[slug] = {
+      bg: cs.getPropertyValue('--bg-base').trim(),
+      acc: cs.getPropertyValue('--acc').trim(),
+    };
+  }
+  // Restore before returning, or the app is left wearing the last palette read.
+  if (prevPal) root.setAttribute('data-pal', prevPal); else root.removeAttribute('data-pal');
+  if (prevMode) root.setAttribute('data-mode', prevMode); else root.removeAttribute('data-mode');
+  return out;
+}
+
+// Populated by refreshSwatchColours(). onboarding.js reads this global to paint its
+// own copy of the grid, so it keeps the { slug, label, bg, acc } shape v1 used.
+let THEME_PALETTES = THEME_PALETTE_LABELS.map((p) => ({ ...p, bg: '', acc: '' }));
+
+// The Aether palettes differ between light and dark, so the cached colours are only
+// valid for the mode they were read in. Re-read on every mode change rather than
+// caching once at mount, or the grid keeps showing dark chips in light mode.
+let swatchColourMode = null;
+
+function refreshSwatchColours() {
+  const colours = readSwatches(THEME_PALETTE_LABELS.map((p) => p.slug));
+  THEME_PALETTES = THEME_PALETTE_LABELS.map((p) => ({
+    ...p,
+    bg: colours[p.slug] ? colours[p.slug].bg : '',
+    acc: colours[p.slug] ? colours[p.slug].acc : '',
+  }));
+  swatchColourMode = currentMode();
+}
+
+function ensureSwatchColours() {
+  if (swatchColourMode !== currentMode()) refreshSwatchColours();
+}
 
 function renderSwatches() {
   const grid = document.getElementById('swatch-grid');
   if (!grid) return;
-  const active = document.documentElement.dataset.palette || 'midnight';
+  ensureSwatchColours();
+  const active = currentPalette();
   grid.innerHTML = THEME_PALETTES.map((p) => {
     const border = p.slug === active ? 'var(--acc)' : 'transparent';
     return `
@@ -38,13 +118,60 @@ function renderSwatches() {
   }).join('');
 }
 
-async function selectPalette(slug) {
-  document.documentElement.dataset.palette = slug;
-  renderSwatches(); // moves the active border to the new swatch
+// Applies palette + mode to the root and repaints everything that depends on them.
+// lang is derived here rather than passed in, so it cannot be set inconsistently.
+function applyTheme(slug, mode) {
+  const root = document.documentElement;
+  root.dataset.pal = slug;
+  root.dataset.mode = mode;
+  root.dataset.lang = langFor(slug);
+  refreshSwatchColours(); // the palette or mode just changed, so the chips are stale
+  renderSwatches();       // moves the active border to the new swatch
+  renderModeControl();
+  if (typeof window.TT === 'object' && window.TT.onboarding
+      && typeof window.TT.onboarding.renderSwatches === 'function') {
+    window.TT.onboarding.renderSwatches();
+  }
   if (window.__ttTerm && typeof applyTerminalTheme === 'function') {
     applyTerminalTheme(window.__ttTerm);
   }
-  await window.tokenTracker.theme.set({ theme: slug });
+}
+
+async function selectPalette(slug) {
+  const mode = currentMode();
+  applyTheme(slug, mode);
+  // theme:set returns the resolved config, so an invalid slug reconciles rather than
+  // leaving the UI showing a palette that was never persisted.
+  const saved = await window.tokenTracker.theme.set({ theme: slug, mode });
+  if (saved && saved.theme && saved.theme !== slug) applyTheme(saved.theme, saved.mode);
+}
+
+async function selectMode(mode) {
+  const slug = currentPalette();
+  applyTheme(slug, mode);
+  await window.tokenTracker.theme.set({ theme: slug, mode });
+}
+
+// Light/dark segmented control. The nine legacy palettes are single-mode - tokens.css
+// defines no light variant for them - so the control is disabled rather than left
+// active and inert, which would read as a broken toggle.
+function renderModeControl() {
+  const box = document.getElementById('mode-seg');
+  if (!box) return;
+  const mode = currentMode();
+  const isAether = AETHER_SLUGS.includes(currentPalette());
+  box.title = isAether ? '' : 'This palette has a single fixed mode';
+  box.innerHTML = ['dark', 'light'].map((m) => {
+    const active = m === mode && isAether;
+    return `
+      <button type="button" class="mode-btn${active ? ' active' : ''}" data-mode="${escapeHtml(m)}"
+        ${isAether ? '' : 'disabled'}
+        style="flex:1;padding:4px 10px;border:none;border-radius:5px;cursor:${isAether ? 'pointer' : 'not-allowed'};
+               font:500 10px 'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em;
+               opacity:${isAether ? '1' : '.45'};
+               background:${active ? 'var(--acc)' : 'transparent'};
+               color:${active ? 'var(--acc-ink, #000)' : 'var(--dim)'}">${escapeHtml(m)}</button>`;
+  }).join('');
 }
 
 async function populateBudgetForm() {
@@ -117,6 +244,7 @@ async function openSettings() {
   await populateBudgetForm();
   await refreshAlertsSection();
   renderSwatches();
+  renderModeControl();
   document.getElementById('settings-backdrop').style.display = 'block';
   document.getElementById('settings-popover').style.display = 'block';
 }
@@ -160,10 +288,17 @@ async function persistPanels() {
 
 function mountSettings() {
   renderSwatches();
+  renderModeControl();
   document.getElementById('swatch-grid').addEventListener('click', (e) => {
     const btn = e.target.closest('.swatch-btn');
     if (!btn) return;
     selectPalette(btn.dataset.slug);
+  });
+  const modeSeg = document.getElementById('mode-seg');
+  if (modeSeg) modeSeg.addEventListener('click', (e) => {
+    const btn = e.target.closest('.mode-btn');
+    if (!btn || btn.disabled) return;
+    selectMode(btn.dataset.mode);
   });
   document.getElementById('settings-btn').addEventListener('click', toggleSettings);
   document.getElementById('settings-close-btn').addEventListener('click', closeSettings);
