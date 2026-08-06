@@ -13,7 +13,8 @@
     "postinstall": "node scripts/grant-appcontainer-acl.js",
     "test": "node --test \"test/*.test.js\" && npm test --workspace @tokenmonitor/core",
     "build:core": "npm run build --workspace @tokenmonitor/core",
-    "dist": "node scripts/dist.js"
+    "dist": "node scripts/dist.js",
+  "probe": "electron scripts/probe-renderer.js"
   },
   "dependencies": {
     "@tokenmonitor/core": "*",

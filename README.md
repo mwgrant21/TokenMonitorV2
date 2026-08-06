@@ -140,6 +140,24 @@ plans, with the plans themselves reviewed before execution. The two divergences 
 were found by diffing the duplicated modules during extraction, not by either test suite — which is
 the honest summary of what "verified" means here.
 
+### `npm run probe` — check what the renderer actually resolves
+
+`node --test` reads source as text; it cannot tell you what the browser did with it. The reskin's
+failure modes are all invisible to the eye: an empty CSS custom property renders as a transparent
+chip that looks plausible against a dark panel, a font 404 falls through to Bahnschrift, and an
+overridden alias layer paints a perfectly coherent app in the wrong palette.
+
+`npm run probe` loads `src/renderer/index.html` in a real headless Chromium and reports what
+`getComputedStyle` and `document.fonts` say — every palette variant, the swatch grid, the font
+faces, the panel background. It exits non-zero on failure, so it can gate a change instead of being
+read by eye. Run one group with `npx electron scripts/probe-renderer.js tokens`.
+
+Two traps it encodes, both of which produced a false alarm before being understood:
+`document.fonts.check()` never triggers a fetch, so it reports `false` for a correct `@font-face` in
+an offscreen window — use `load()`; and setting `data-pal` without `data-lang` reports legacy
+palettes as having no panel background at all, because `html[data-lang="flat"]` is what maps
+`--panel-grad` onto the flat tokens.
+
 ## License
 
 MIT
