@@ -14,7 +14,7 @@ const {
 const { loadOptimizeState } = require('../shared/optimizeState');
 const { loadBudgetConfig, saveBudgetConfig } = require('../shared/budgetConfig');
 const { deriveBudgetsFromMonthly } = require('../shared/budgetDerive');
-const { loadThemeConfig, saveThemeConfig, KNOWN_PALETTES } = require('../shared/themeConfig');
+const { loadThemeConfig, saveThemeConfig, KNOWN_PALETTES, KNOWN_MODES } = require('../shared/themeConfig');
 const { loadPanelsConfig, savePanelsConfig } = require('../shared/panelsConfig');
 const { loadUiConfig, saveUiConfig } = require('../shared/uiConfig');
 const { loadAlertsConfig, saveAlertsConfig, RANGES } = require('../shared/alertsConfig');
@@ -159,7 +159,13 @@ function registerIpcHandlers({ liveAggregator, getHistoryEvents, getHistoryAggre
     const current = await loadThemeConfig(themeConfigPath);
     const incoming = payload && payload.theme;
     const theme = KNOWN_PALETTES.includes(incoming) ? incoming : current.theme;
-    return saveThemeConfig(themeConfigPath, { theme });
+    // Carry the axis this call did not specify. saveThemeConfig now persists mode as
+    // well as theme, so passing { theme } alone would reset mode to the default on
+    // every palette change - the same discard-what-you-do-not-name defect the plan
+    // flags as Trap 1, one level up in the call chain.
+    const incomingMode = payload && payload.mode;
+    const mode = KNOWN_MODES.includes(incomingMode) ? incomingMode : current.mode;
+    return saveThemeConfig(themeConfigPath, { theme, mode });
   });
 
   ipcMain.handle('panels:get', () => loadPanelsConfig(panelsConfigPath));
