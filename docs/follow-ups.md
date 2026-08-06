@@ -95,7 +95,11 @@ Opened 2026-08-06 while executing reskin Task 3
 
 ## 5. The compatibility alias layer is inert — the reskin is not reaching dashboard.css
 
-**Status:** open. Closes in Task 4 under the resequenced order (5 -> 6 -> 4).
+**Status: CLOSED 2026-08-06** in Task 4, commit below. dashboard.css's `:root` and nine
+`[data-palette]` blocks are deleted, so the aliases resolve. Measured after the fix in
+the same way it was measured before: `var(--bg)` now returns `rgb(10,12,13)` under
+steel/dark against `--bg-base` `#0a0c0d`, `rgb(239,241,242)` under steel/light, and
+`rgb(46,52,64)` under nord - i.e. it tracks the palette exactly.
 
 Task 1 added an alias block at `src/renderer/styles/tokens.css:258` mapping v1's ten
 variables onto the Aether tokens (`--bg: var(--bg-base)`, and so on) so that "every
@@ -126,7 +130,10 @@ are real work that is currently invisible below the token layer.
 
 ## 6. Tokyo Night is still selectable, having been cut for failing WCAG
 
-**Status:** open. Live accessibility issue, not cosmetic. Closes in Task 4.
+**Status: CLOSED 2026-08-06** in Task 4. Removed from `themeConfig.js` (Task 5),
+`settingsPanel.js` (Task 6) and `dashboard.css` (Task 4). `test/paletteEscapes.test.js`
+and `test/settingsPalettes.test.js` both fail if the slug reappears anywhere in the
+renderer, and `loadThemeConfig` migrates a user already on it to the default.
 
 Task 2 cut `tokyonight` on measured contrast failure (`tx-muted` 2.76:1, `tx-dim`
 2.31:1) and `test/contrast.test.js` enforces its absence. From `tokens.css` only.
@@ -146,6 +153,32 @@ Adding a layer is not migrating to it; the migration is the deletion.
 static attributes on `<html>` that nothing ever writes. Deleting the legacy blocks
 before Task 6 rebuilds the control would leave palette switching doing nothing at all.
 Hence the resequence to 5 -> 6 -> 4 agreed 2026-08-06.
+
+Opened 2026-08-06 while executing reskin Task 4.
+
+## 7. The self-hosted fonts are loaded but never used
+
+**Status:** open. Closes in Task 7 or 8.
+
+Task 3 vendored Rajdhani and Space Mono and proved they load
+(`test/fonts.test.js`, plus `document.fonts.load()` in a real Chromium context).
+`tokens.css` defines `--f-ui` leading with Rajdhani and `--f-mono` leading with Space
+Mono. But **nothing consumes either token**: `grep -rn 'var(--f-ui)\|var(--f-mono)' src/`
+outside `tokens.css` returns zero hits, against 99 hardcoded `'JetBrains Mono'`
+references in the renderer.
+
+So the fonts are fetched and then never rendered. The Rajdhani/Space Mono split is
+described in the plan as "the single biggest carrier of the look" and it is currently
+carrying nothing.
+
+**This is the third instance of one pattern in this reskin** - see items 5 and 6. A new
+layer is added beside an old one, tests bind only the new layer, and behaviour does not
+change. Adding a layer is not migrating to it; the migration is the deletion. Worth
+checking for a fourth before Phase 5 closes.
+
+**Fix:** replace the hardcoded font stacks with `var(--f-ui)` / `var(--f-mono)` during
+the chrome pass, and add a test asserting the tokens have consumers - not merely that
+they are defined.
 
 ---
 

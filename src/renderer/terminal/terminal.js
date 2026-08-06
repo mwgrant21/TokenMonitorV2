@@ -7,11 +7,16 @@
 // (node_modules/xterm/lib/xterm.js), which attaches `Terminal` to the global
 // scope. Behavior and structure otherwise match the plan.
 function mountTerminal(containerEl) {
-  const term = new Terminal({
+  const options = {
     fontFamily: "'JetBrains Mono', monospace",
     fontSize: 12.5,
-    theme: { background: '#0b0e14', foreground: '#e7ebf3' },
-  });
+  };
+  // Build the initial theme from the CSS the same way applyTerminalTheme() does.
+  // Hardcoding it here meant the terminal stayed Midnight-dark in all nineteen
+  // palettes until something happened to call applyTerminalTheme.
+  const initial = readTerminalTheme();
+  if (initial) options.theme = initial;
+  const term = new Terminal(options);
   const fit = new FitAddon.FitAddon(); // UMD global from xterm-addon-fit script tag
   term.loadAddon(fit);
   term.open(containerEl);
@@ -74,14 +79,27 @@ function mountTerminal(containerEl) {
   return term;
 }
 
-// Recolor the xterm instance from the active CSS palette. The CSS palette
-// ([data-palette] on <html>) is the single source of truth; we only read the
-// computed variables here, never hardcode a second copy of the colors.
-function applyTerminalTheme(term) {
+// Read the terminal's colours from the active CSS palette. The CSS palette
+// (html[data-pal][data-mode], defined in ../styles/tokens.css) is the single source
+// of truth; we only read the computed variables here, never hardcode a second copy.
+//
+// --bg-term is the terminal's own background token, which a palette may set darker
+// than the page. The --bg/--tx fallbacks cover the compatibility aliases in case a
+// palette omits the terminal-specific tokens.
+function readTerminalTheme() {
   const cs = getComputedStyle(document.documentElement);
-  const background = cs.getPropertyValue('--bg').trim();
-  const foreground = cs.getPropertyValue('--tx').trim();
+  const background = cs.getPropertyValue('--bg-term').trim()
+    || cs.getPropertyValue('--bg').trim();
+  const foreground = cs.getPropertyValue('--tx-primary').trim()
+    || cs.getPropertyValue('--tx').trim();
   const cursor = cs.getPropertyValue('--acc').trim();
-  if (!background) return; // CSS not ready; keep constructor defaults
-  term.options.theme = { background, foreground, cursor };
+  if (!background) return null; // CSS not ready
+  return { background, foreground, cursor };
+}
+
+// Recolor a live xterm instance after a palette or mode change.
+function applyTerminalTheme(term) {
+  const theme = readTerminalTheme();
+  if (!theme) return; // CSS not ready; keep whatever it has
+  term.options.theme = theme;
 }

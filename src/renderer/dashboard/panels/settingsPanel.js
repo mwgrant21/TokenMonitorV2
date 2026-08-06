@@ -170,7 +170,7 @@ function renderModeControl() {
                font:500 10px 'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em;
                opacity:${isAether ? '1' : '.45'};
                background:${active ? 'var(--acc)' : 'transparent'};
-               color:${active ? 'var(--acc-ink, #000)' : 'var(--dim)'}">${escapeHtml(m)}</button>`;
+               color:${active ? 'var(--acc-ink)' : 'var(--dim)'}">${escapeHtml(m)}</button>`;
   }).join('');
 }
 
