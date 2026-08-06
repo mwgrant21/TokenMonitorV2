@@ -721,7 +721,12 @@ else. Confirm you see exactly that before fixing it.
 
 - [ ] **Step 3: Rewrite `themeConfig.js`**
 
-- `KNOWN_PALETTES` becomes the 19: the five Aether slugs plus the nine legacy. Remove `tokyonight`.
+- `KNOWN_PALETTES` becomes **14 slugs**: the five Aether slugs plus the nine legacy. Remove
+  `tokyonight`. **Corrected 2026-08-06, during execution** - this step originally said "becomes the
+  19". 19 is the count of palette *variants*, which is what `tokens.css` defines: five Aether slugs in
+  two modes (10) plus nine single-mode legacy slugs. The `mode` axis supplies that doubling, so putting
+  19 in the slug list would double it twice. `test/themeConfig.test.js` asserts the multiplication
+  (`5 * 2 + 9 === 19`) rather than restating either number alone.
 - Add `AETHER_PALETTES` and `KNOWN_MODES = ['dark','light']`.
 - `lang` is **derived, not stored independently**: a legacy palette is always `flat`, an Aether
   palette is always `aether`. Deriving it removes a whole class of inconsistent state.
@@ -731,13 +736,18 @@ else. Confirm you see exactly that before fixing it.
 
 - [ ] **Step 4: Tests pass, then commit**
 
+Note: `src/main/ipcHandlers.js` also needs a one-line change, which this task's file list omits.
+`theme:set` calls `saveThemeConfig(path, { theme })` with no `mode`; once `mode` is persisted, every
+palette change would reset it to the default. That is Trap 1 one level up in the call chain.
+
 ```bash
 npm test
-git add src/shared/themeConfig.js test/themeConfig.test.js
+git add src/shared/themeConfig.js test/themeConfig.test.js src/main/ipcHandlers.js
 git commit -m "feat(reskin): persist palette and light/dark mode
 
-KNOWN_PALETTES grows to nineteen; tokyonight is removed and users on it
-fall back to the default rather than erroring. Default becomes steel/dark.
+KNOWN_PALETTES becomes fourteen slugs (nineteen variants); tokyonight is
+removed and users on it fall back to the default rather than erroring.
+Default becomes steel/dark.
 
 The real fix is in saveThemeConfig, which wrote JSON.stringify({ theme })
 and silently discarded every other key. A mode toggle built on it would
