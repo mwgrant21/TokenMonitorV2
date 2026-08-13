@@ -64,13 +64,28 @@ npm test
 
 ### `src/` + `test/` — version readout for manual rollout
 
-`versionCheck.js` (pure) and `latestVersionReader.js` (one local file read). A `latest.json` dropped
-into the existing shared fleet folder is the entire update check — no server, no network request, no
-bundled credential.
+`versionCheck.js` (pure) and `latestVersionReader.js` (one local file read) are combined in
+`src/main/versionStatus.js` and exposed to the renderer as `version:getStatus`. A `latest.json`
+dropped into the connected fleet folder is the entire update check — no server, no network request,
+no bundled credential. The read rides the same 60s tick that already rescans session history; there
+is no separate polling timer.
 
 Three states, and the important one is `unknown`: a missing, unreachable or malformed `latest.json`
 means *we do not know*, and must never render as "up to date". Silently claiming currency is exactly
-the failure this replaces. 10 assertions green.
+the failure this replaces. The footer version chip and the Settings popover's Version line both
+mirror the same status; the app only ever shows an `UPDATE AVAILABLE` chip when it actually is, and
+stays silent otherwise.
+
+**Publishing a build:** after cutting it and rolling it out to devices, drop this into the shared
+fleet folder as `latest.json`:
+
+```json
+{ "version": "2.2.0", "notes": "tach instruments, palette rework", "published": "2026-08-04" }
+```
+
+Only `version` is read; `notes` and `published` are for humans reading the file and are safe to add.
+**Update the file after the rollout, not before** — publishing it first makes every seat show
+`UPDATE AVAILABLE` for a build nobody can get yet, which trains people to ignore the chip.
 
 ### `docs/prototype/index.html` — the v2 design system, clickable
 
