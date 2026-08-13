@@ -67,6 +67,28 @@ key not named there is dropped on read. This plan deliberately puts theme state 
 rather than `uiConfig.js` to avoid touching it — but if you decide to store anything in `ui.json`,
 it must be added to **both** `UI_DEFAULTS` and `sanitize()`.
 
+## Execution order — corrected twice during execution
+
+The written task numbering is **not** the execution order. Two resequences were agreed while
+running the plan, both for the same reason: a task's precondition lived in a later task.
+
+**1 → 2 → 3 → 5 → 6 → 4 → 8 → 7.**
+
+- **5 → 6 → 4** (agreed 2026-08-06). Task 4 deletes `dashboard.css`'s `[data-palette]` blocks, but
+  `data-palette` was still the live switch (`settingsPanel.js:42`). Deleting them before Task 6
+  rebuilt the control onto `data-pal`/`data-mode` would have left palette switching doing nothing.
+- **8 before 7** (agreed 2026-08-10). Task 7 restyles the header through `.titlebar` CSS, but
+  `index.html:14` is `<header style="…">`, and `<body>`, `#content-row`, `#terminal-pane` and
+  `#dashboard-pane` are inline-styled too. Inline wins, so Task 7's header and layout rules would
+  land in the stylesheet and change nothing on screen — while the commit looked done. Task 8's own
+  preamble states this ("any rule targeting those surfaces silently does nothing until they are
+  gone"); the numbering simply did not honour it.
+
+**This is the plan's third instance of one failure shape** — see follow-ups 5, 6 and 7. A new layer
+is added beside an old one that still serves the users, and the tests bind only the new layer.
+Adding a layer is not migrating to it; the migration is the deletion. Sequence deletions **before**
+the work that depends on them, not after.
+
 ---
 
 ### Task 1: The Aether token layer, wired in behind compatibility aliases
