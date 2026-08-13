@@ -9,10 +9,10 @@
   <link rel="stylesheet" href="./dashboard/dashboard.css">
   <link rel="stylesheet" href="./fleet/fleet.css">
 </head>
-<body style="margin:0;display:flex;flex-direction:column;width:100vw;height:100vh">
+<body>
   <div id="mini-root"></div>
-  <header style="display:flex;justify-content:flex-end;align-items:center;gap:6px;padding:8px 16px">
-    <div id="period-seg" style="display:flex;gap:2px;background:var(--panel);border:1px solid var(--bd);border-radius:6px;padding:2px;margin-right:6px">
+  <header class="hdr">
+    <div id="period-seg" class="seg">
       <button type="button" class="period-btn" id="period-today" data-period="today">Today</button>
       <button type="button" class="period-btn active" id="period-7d" data-period="7d">7 Days</button>
       <button type="button" class="period-btn" id="period-30d" data-period="30d">30 Days</button>
@@ -23,26 +23,26 @@
       <button id="export-btn" type="button" class="hdr-btn icon" title="Export report (E)">&#10515;</button>
       <button id="mini-btn" type="button" class="hdr-btn icon" title="Mini mode (M)">&#8862;</button>
     </div>
-    <div id="settings-wrap" style="position:relative">
-      <button id="settings-btn" title="Settings" aria-label="Settings" style="background:var(--panel);border:1px solid var(--bd);color:var(--tx);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:14px;line-height:1">&#9881;</button>
-      <div id="settings-backdrop" style="display:none;position:fixed;inset:0;z-index:1000"></div>
-      <div id="settings-popover" style="display:none;position:absolute;top:calc(100% + 6px);right:0;z-index:1001;width:300px;text-align:left;background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.45)">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <div style="font:600 13px 'JetBrains Mono',monospace;color:var(--tx)">Settings</div>
-          <button id="settings-close-btn" title="Close" aria-label="Close" style="background:transparent;border:none;color:var(--dim);font-size:16px;line-height:1;cursor:pointer">&#215;</button>
+    <div id="settings-wrap">
+      <button id="settings-btn" title="Settings" aria-label="Settings">&#9881;</button>
+      <div id="settings-backdrop"></div>
+      <div id="settings-popover">
+        <div class="settings-popover-head">
+          <div class="settings-popover-title">Settings</div>
+          <button id="settings-close-btn" title="Close" aria-label="Close">&#215;</button>
         </div>
-        <div class="hero-label" style="margin-bottom:8px">Appearance - theme</div>
-        <div id="swatch-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
-        <div class="hero-label" style="margin:12px 0 6px">Appearance - mode</div>
-        <div id="mode-seg" style="display:flex;gap:2px;background:var(--panel);border:1px solid var(--bd);border-radius:6px;padding:2px"></div>
-        <div style="height:1px;background:var(--bd);margin:14px 0"></div>
-        <div class="hero-label" style="margin-bottom:2px">Budget thresholds (tokens)</div>
+        <div class="hero-label settings-label-theme">Appearance - theme</div>
+        <div id="swatch-grid"></div>
+        <div class="hero-label settings-label-mode">Appearance - mode</div>
+        <div id="mode-seg" class="seg"></div>
+        <div class="settings-divider"></div>
+        <div class="hero-label settings-label-budget">Budget thresholds (tokens)</div>
         <div id="budget-form"></div>
-        <div style="display:flex;justify-content:flex-end;margin-top:14px">
-          <button id="budget-save-btn" style="background:var(--acc);color:var(--bg);border:none;border-radius:6px;padding:6px 12px;cursor:pointer">Save</button>
+        <div class="settings-save-row">
+          <button id="budget-save-btn">Save</button>
         </div>
-        <div style="height:1px;background:var(--bd);margin:14px 0"></div>
-        <div class="hero-label" style="margin-bottom:6px">Panels</div>
+        <div class="settings-divider"></div>
+        <div class="hero-label settings-label-panels">Panels</div>
         <label class="panel-toggle-row" for="toggle-optimize">
           <span class="panel-toggle-label">Optimize findings</span>
           <span class="toggle-switch"><input type="checkbox" id="toggle-optimize"><span class="toggle-slider"></span></span>
@@ -51,8 +51,8 @@
           <span class="panel-toggle-label">Token treemap</span>
           <span class="toggle-switch"><input type="checkbox" id="toggle-treemap"><span class="toggle-slider"></span></span>
         </label>
-        <div style="height:1px;background:var(--bd);margin:14px 0"></div>
-        <div class="hero-label" style="margin-bottom:6px">Alerts &amp; thresholds</div>
+        <div class="settings-divider"></div>
+        <div class="hero-label settings-label-alerts">Alerts &amp; thresholds</div>
         <label class="panel-toggle-row" for="alerts-enabled-toggle">
           <span class="panel-toggle-label">Enable alerts</span>
           <span class="toggle-switch"><input type="checkbox" id="alerts-enabled-toggle"><span class="toggle-slider"></span></span>
@@ -67,20 +67,20 @@
           <div class="th-row"><span class="th-label">Agent ceiling</span>
             <span class="th-stepper"><button type="button" class="th-btn" data-key="thAgent" data-dir="-1">&#8722;</button><span class="th-value" id="th-thAgent"></span><button type="button" class="th-btn" data-key="thAgent" data-dir="1">&#43;</button><span class="th-unit">k tok</span></span></div>
         </div>
-        <div style="height:1px;background:var(--bd);margin:14px 0"></div>
-        <button id="settings-replay-btn" type="button" style="background:transparent;border:1px solid var(--bd);color:var(--dim);border-radius:6px;padding:6px 10px;cursor:pointer;width:100%">&#8635; Replay setup</button>
+        <div class="settings-divider"></div>
+        <button id="settings-replay-btn" type="button">&#8635; Replay setup</button>
       </div>
     </div>
     <span id="seats-chip" class="seats-chip" style="display:none"></span>
-    <div id="view-seg" style="display:flex;gap:2px;background:var(--panel);border:1px solid var(--bd);border-radius:6px;padding:2px">
+    <div id="view-seg" class="seg">
       <button type="button" class="view-btn active" id="view-personal">Personal</button>
       <button type="button" class="view-btn" id="view-team">Team</button>
     </div>
   </header>
-  <div id="content-row" style="flex:1;display:flex;min-height:0">
+  <div id="content-row">
   <div id="terminal-pane" style="flex:0 0 560px"><div id="cli-toast" style="display:none"></div></div>
   <div id="pane-divider" title="Drag to resize"></div>
-  <div id="dashboard-pane" style="flex:1;overflow:auto">
+  <div id="dashboard-pane">
     <div id="alerts-banner"></div>
     <div class="hero-grid" id="hero-grid"></div>
     <div class="insights-stack" id="insights-panel" style="display:none"></div>
@@ -94,8 +94,8 @@
   </div>
 
   <!-- Apply-fix confirm dialog -->
-  <div id="optimize-apply-backdrop" style="display:none"></div>
-  <div id="optimize-apply-modal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="optimize-apply-heading">
+  <div id="optimize-apply-backdrop"></div>
+  <div id="optimize-apply-modal" role="dialog" aria-modal="true" aria-labelledby="optimize-apply-heading">
     <div class="optimize-apply-head">
       <div id="optimize-apply-heading" class="optimize-apply-title">Apply fix</div>
       <button id="optimize-apply-close-btn" type="button" title="Close" aria-label="Close" class="optimize-apply-close">&#215;</button>
@@ -126,8 +126,8 @@
   </div>
 
   <!-- Export report modal -->
-  <div id="export-backdrop" style="display:none"></div>
-  <div id="export-modal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="export-heading">
+  <div id="export-backdrop"></div>
+  <div id="export-modal" role="dialog" aria-modal="true" aria-labelledby="export-heading">
     <div class="export-head">
       <div id="export-heading" class="export-title">Export report</div>
       <span id="export-scope-label" class="export-scope"></span>
@@ -150,7 +150,7 @@
           <button type="button" class="export-chip" data-scope="month">This month</button>
         </div>
       </div>
-      <div class="export-includes"><span style="color:var(--acc2)">&#10515;</span> Includes budgets, task breakdown, model split &amp; optimize findings.</div>
+      <div class="export-includes"><span class="export-includes-icon">&#10515;</span> Includes budgets, task breakdown, model split &amp; optimize findings.</div>
       <div id="export-status" class="export-status"></div>
       <div class="export-actions">
         <button id="export-cancel-btn" type="button" class="export-btn secondary">Cancel</button>
