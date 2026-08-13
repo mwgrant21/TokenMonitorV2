@@ -29,6 +29,19 @@ body { margin: 0; background: var(--bg); color: var(--tx); font-family: system-u
 /* ---- footer status strip (prototype :480) ---- */
 .footer { flex: none; display: flex; align-items: center; gap: 14px; padding: 0 16px; height: 34px; background: var(--chrome-bg); border-top: 1px solid var(--chrome-bd); font: 400 9.5px/1 var(--f-mono); color: var(--tx-dim); }
 .footer-fleet { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 420px; }
+
+/* ---- version readout + update-available chip + popover ---- */
+#version-wrap { position: relative; }
+#footer-version-btn { background: transparent; border: none; color: var(--tx-dim); cursor: pointer; font: inherit; padding: 0; }
+#footer-version-btn:hover { color: var(--tx-secondary); }
+/* Two of the three states render nothing (footerVersion.js) - .warning / .critical
+   reuse the alert banner's severity tokens, same reasoning as .footer-status. */
+#footer-update-chip { display: none; cursor: pointer; font: 700 9px/1 var(--f-ui); letter-spacing: 1px; padding: 3px 7px; border-radius: var(--r-chip); border: 1px solid currentColor; background: transparent; margin-left: 8px; }
+#footer-update-chip.warning { color: var(--warn); }
+#footer-update-chip.critical { color: var(--danger); }
+#footer-version-backdrop { display: none; position: fixed; inset: 0; z-index: 1000; }
+#footer-version-pop { display: none; position: absolute; bottom: calc(100% + 9px); left: 0; z-index: 1001; width: 240px; text-align: left; background: var(--panel); border: 1px solid var(--bd); border-radius: 12px; padding: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, .45); font-family: system-ui, -apple-system, sans-serif; font-size: 12px; color: var(--tx); line-height: 1.5; }
+#footer-version-pop-meta { color: var(--dim); margin-top: 6px; }
 /* --alarm defaults to --success (:root, tokens.css) - a healthy/live baseline,
    not a warning color, so it's the footer status's default. The .warning /
    .critical modifiers reuse the same severity tokens the alert banner already
@@ -54,7 +67,9 @@ body { margin: 0; background: var(--bg); color: var(--tx); font-family: system-u
 #settings-popover .settings-label-mode { margin: 12px 0 6px; }
 #settings-popover .settings-label-budget { margin-bottom: 2px; }
 #settings-popover .settings-label-panels,
-#settings-popover .settings-label-alerts { margin-bottom: 6px; }
+#settings-popover .settings-label-alerts,
+#settings-popover .settings-label-version { margin-bottom: 6px; }
+#settings-version-line { font: 500 11px 'JetBrains Mono', monospace; color: var(--dim); }
 
 /* ---- export modal icon ---- */
 .export-includes-icon { color: var(--acc2); }

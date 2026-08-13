@@ -4,6 +4,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('tokenTracker', {
   app: {
     version: () => ipcRenderer.invoke('app:getVersion'),
+    versionStatus: () => ipcRenderer.invoke('version:getStatus'),
   },
   pty: {
     start: (opts) => ipcRenderer.invoke('pty:start', opts),

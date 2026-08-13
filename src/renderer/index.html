@@ -69,6 +69,9 @@
         </div>
         <div class="settings-divider"></div>
         <button id="settings-replay-btn" type="button">&#8635; Replay setup</button>
+        <div class="settings-divider"></div>
+        <div class="hero-label settings-label-version">Version</div>
+        <div id="settings-version-line"></div>
       </div>
     </div>
     <div id="view-seg" class="seg">
@@ -92,7 +95,15 @@
   <div id="fleet-pane" style="display:none;flex:1;overflow:auto"></div>
   </div>
   <div class="footer">
-    <span id="footer-version"></span>
+    <div id="version-wrap">
+      <button type="button" id="footer-version-btn" title="Version"></button>
+      <span id="footer-update-chip"></span>
+      <div id="footer-version-backdrop"></div>
+      <div id="footer-version-pop">
+        <div class="settings-popover-title" id="footer-version-pop-current"></div>
+        <div id="footer-version-pop-meta"></div>
+      </div>
+    </div>
     <span id="seats-chip" class="seats-chip" style="display:none"></span>
     <span id="footer-fleet" class="footer-fleet" style="display:none"></span>
     <span id="footer-status" class="footer-status"></span>
@@ -183,6 +194,7 @@
   <script src="./dashboard/panels/activity.js"></script>
   <script src="./dashboard/panels/alerts.js"></script>
   <script src="./dashboard/panels/footerStatus.js"></script>
+  <script src="./dashboard/panels/footerVersion.js"></script>
   <script src="./dashboard/panels/optimize.js"></script>
   <script src="./dashboard/panels/settingsPanel.js"></script>
   <script src="./dashboard/panels/insights.js"></script>
@@ -215,11 +227,6 @@
         document.getElementById('terminal-pane').style.flex = `0 0 ${ui.cliWidth}px`;
       } catch (e) { /* keep 560px default */ }
 
-      try {
-        const v = await window.tokenTracker.app.version();
-        document.getElementById('footer-version').textContent = `v${v}`;
-      } catch (e) { /* leave blank */ }
-
       mountTerminal(document.getElementById('terminal-pane'));
       mountDashboard();
       mountSettings();
@@ -227,6 +234,7 @@
       window.TT.onboarding.mount();
       window.TT.paneResize.mount();
       window.TT.shortcuts.mount();
+      window.TT.footerVersion.mount();
       mountFleet();
       await window.TT.view.mount();
       window.TT.mini.mount();

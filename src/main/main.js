@@ -14,6 +14,7 @@ const { writeFleetSnapshot } = require('./fleetSnapshotWriter');
 const { loadUiConfig, saveUiConfig } = require('../shared/uiConfig');
 const { seatsChipCounts, teamWaste, deptTotals } = require('../shared/fleetAggregator');
 const { createUsageScraper } = require('./usageScraper');
+const { computeVersionStatus } = require('./versionStatus');
 
 const UI_CONFIG_PATH = path.join(os.homedir(), '.claude-token-tracker', 'ui.json');
 
@@ -128,6 +129,9 @@ app.whenReady().then(async () => {
       freshAggregator.ingest(event);
     }
     historyAggregator = freshAggregator;
+    // Reading one small file per minute off a share the app already reads is
+    // free; this rides the existing tick rather than adding a second timer.
+    await refreshVersionStatus().catch(() => {});
   };
   await rescanHistory();
   setInterval(rescanHistory, 60_000);
@@ -216,6 +220,17 @@ ipcMain.on('pty:resize', (event, { cols, rows }) => {
 ipcMain.handle('app:getVersion', () => app.getVersion());
 
 let fleetFolderPath = null;
+
+// Cached, not read-on-request: the periodic tick below refreshes it, so a
+// renderer poll never blocks on an SMB read. Starts 'unknown' rather than
+// guessing 'current' before the first tick has had a chance to check.
+let versionStatus = { state: 'unknown', current: app.getVersion(), latest: null, behindBy: null };
+
+async function refreshVersionStatus() {
+  versionStatus = await computeVersionStatus(app.getVersion(), fleetFolderPath);
+}
+
+ipcMain.handle('version:getStatus', () => versionStatus);
 
 ipcMain.handle('fleet:pickFolder', async () => {
   const result = await dialog.showOpenDialog({ properties: ['openDirectory'] });
