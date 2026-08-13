@@ -71,7 +71,6 @@
         <button id="settings-replay-btn" type="button">&#8635; Replay setup</button>
       </div>
     </div>
-    <span id="seats-chip" class="seats-chip" style="display:none"></span>
     <div id="view-seg" class="seg">
       <button type="button" class="view-btn active" id="view-personal">Personal</button>
       <button type="button" class="view-btn" id="view-team">Team</button>
@@ -91,6 +90,12 @@
     <div class="treemap-panel" id="treemap-panel" style="display:none"></div>
   </div>
   <div id="fleet-pane" style="display:none;flex:1;overflow:auto"></div>
+  </div>
+  <div class="footer">
+    <span id="footer-version"></span>
+    <span id="seats-chip" class="seats-chip" style="display:none"></span>
+    <span id="footer-fleet" class="footer-fleet" style="display:none"></span>
+    <span id="footer-status" class="footer-status"></span>
   </div>
 
   <!-- Apply-fix confirm dialog -->
@@ -177,6 +182,7 @@
   <script src="./dashboard/panels/budgets.js"></script>
   <script src="./dashboard/panels/activity.js"></script>
   <script src="./dashboard/panels/alerts.js"></script>
+  <script src="./dashboard/panels/footerStatus.js"></script>
   <script src="./dashboard/panels/optimize.js"></script>
   <script src="./dashboard/panels/settingsPanel.js"></script>
   <script src="./dashboard/panels/insights.js"></script>
@@ -208,6 +214,11 @@
         const ui = await window.tokenTracker.ui.get();
         document.getElementById('terminal-pane').style.flex = `0 0 ${ui.cliWidth}px`;
       } catch (e) { /* keep 560px default */ }
+
+      try {
+        const v = await window.tokenTracker.app.version();
+        document.getElementById('footer-version').textContent = `v${v}`;
+      } catch (e) { /* leave blank */ }
 
       mountTerminal(document.getElementById('terminal-pane'));
       mountDashboard();

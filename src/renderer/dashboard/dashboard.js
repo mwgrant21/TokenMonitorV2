@@ -9,6 +9,7 @@ function mountDashboard() {
     window.TT.activity.render(state);
     window.TT.optimize.render(state);
     window.TT.alertsPanel.render(state);
+    window.TT.footerStatus.render(state);
     window.TT.mini.render(state);
   };
   window.TT = window.TT || {};

@@ -45,12 +45,17 @@ function fmtAgo(ts) {
   return mins <= 0 ? 'just now' : `${mins} min ago`;
 }
 
-function updateSeatsChip(state) {
+function updateFooterInfo(state) {
   const chip = document.getElementById('seats-chip');
-  if (!chip) return;
-  if (!state.connected || !state.chip) { chip.textContent = 'not connected'; return; }
-  const c = state.chip;
-  chip.textContent = `${c.reporting}/${c.total} seats \u00b7 ${c.active} active`;
+  const fleetEl = document.getElementById('footer-fleet');
+  if (chip) {
+    if (!state.connected || !state.chip) chip.textContent = 'not connected';
+    else {
+      const c = state.chip;
+      chip.textContent = `${c.reporting}/${c.total} seats \u00b7 ${c.active} active`;
+    }
+  }
+  if (fleetEl) fleetEl.textContent = state.connected && state.folder ? `\u2913 ${state.folder}` : 'not connected';
 }
 
 function renderToolbar() {
@@ -149,7 +154,7 @@ async function refreshFleetView() {
     // Transient fleet-folder read errors must not flash the disconnected state; keep the last-rendered view
     if (state && state.error) return;
     lastRefreshedAt = Date.now();
-    updateSeatsChip(state);
+    updateFooterInfo(state);
     if (!state.connected) {
       renderEmptyState();
     } else {

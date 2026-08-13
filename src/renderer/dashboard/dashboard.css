@@ -15,11 +15,27 @@ body { margin: 0; background: var(--bg); color: var(--tx); font-family: system-u
    enforces and docs/plans/2026-08-05-reskin-phases-3-4.md Task 8 for scope -
    elements whose JS toggle relies on cascade-fallback ('' meaning "use the
    stylesheet value") were left inline rather than risk changing behavior. */
-.hdr { display: flex; justify-content: flex-end; align-items: center; gap: 6px; padding: 8px 16px; }
+/* .hdr carries the prototype's .titlebar chrome (docs/prototype/index.html:241-244)
+   directly rather than a second class - our header keeps justify-content:flex-end
+   (right-aligned tool cluster) instead of the prototype's left-aligned
+   brand+spacer layout, since Task 7 restyles the existing header, not the
+   prototype's markup. */
+.hdr { flex: none; display: flex; justify-content: flex-end; align-items: center; gap: 6px; padding: 0 16px; height: 48px; background: var(--chrome-bg); border-bottom: 1px solid var(--chrome-bd); backdrop-filter: blur(6px); }
 .seg { display: flex; gap: 2px; background: var(--panel); border: 1px solid var(--bd); border-radius: 6px; padding: 2px; }
 #period-seg { margin-right: 6px; }
 #content-row { flex: 1; display: flex; min-height: 0; }
 #dashboard-pane { flex: 1; overflow: auto; }
+
+/* ---- footer status strip (prototype :480) ---- */
+.footer { flex: none; display: flex; align-items: center; gap: 14px; padding: 0 16px; height: 34px; background: var(--chrome-bg); border-top: 1px solid var(--chrome-bd); font: 400 9.5px/1 var(--f-mono); color: var(--tx-dim); }
+.footer-fleet { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 420px; }
+/* --alarm defaults to --success (:root, tokens.css) - a healthy/live baseline,
+   not a warning color, so it's the footer status's default. The .warning /
+   .critical modifiers reuse the same severity tokens the alert banner already
+   uses (--warn / --danger), since --alarm has no per-severity variants. */
+.footer-status { margin-left: auto; display: flex; align-items: center; gap: 6px; font: 700 9px/1 var(--f-ui); letter-spacing: 1.5px; text-transform: uppercase; color: var(--alarm); }
+.footer-status.warning { color: var(--warn); }
+.footer-status.critical { color: var(--danger); }
 
 /* ---- settings popover ---- */
 #settings-wrap { position: relative; }
@@ -44,7 +60,7 @@ body { margin: 0; background: var(--bg); color: var(--tx); font-family: system-u
 .export-includes-icon { color: var(--acc2); }
 
 .hero-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; padding: 22px 24px 0; }
-.hero-tile { background: var(--panel); border: 1px solid var(--bd); border-radius: 12px; padding: 15px 17px; }
+.hero-tile { background: var(--panel-grad); border: 1px solid var(--panel-bd); border-radius: var(--r-panel); box-shadow: 0 1px 0 var(--acc-wash) inset, 0 10px 30px rgba(0, 0, 0, .28); padding: 15px 17px; }
 .hero-label { font: 700 9.5px 'JetBrains Mono', monospace; letter-spacing: .6px; color: var(--dim); text-transform: uppercase; }
 .hero-value { font: 700 27px/1.1 'JetBrains Mono', monospace; margin-top: 7px; }
 .hero-sub { font: 500 10.5px 'JetBrains Mono', monospace; color: var(--dim); margin-top: 2px; }
@@ -85,7 +101,7 @@ body { margin: 0; background: var(--bg); color: var(--tx); font-family: system-u
 }
 .seats-chip { font: 600 10.5px 'JetBrains Mono', monospace; color: var(--dim); background: var(--panel); border: 1px solid var(--bd); border-radius: 999px; padding: 4px 10px; }
 
-.budget-panel { margin: 20px 24px 0; background: var(--panel); border: 1px solid var(--bd); border-radius: 12px; padding: 15px 17px; }
+.budget-panel { margin: 20px 24px 0; background: var(--panel-grad); border: 1px solid var(--panel-bd); border-radius: var(--r-panel); box-shadow: 0 1px 0 var(--acc-wash) inset, 0 10px 30px rgba(0, 0, 0, .28); padding: 15px 17px; }
 .budget-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
 .budget-label { width: 64px; font: 500 11px 'JetBrains Mono', monospace; color: var(--dim); }
 .budget-track { flex: 1; height: 10px; background: var(--panel2); border-radius: 6px; overflow: hidden; }
@@ -100,25 +116,25 @@ body { margin: 0; background: var(--bg); color: var(--tx); font-family: system-u
 .plan-usage-meta { font: 500 10px 'JetBrains Mono', monospace; color: var(--dim); margin-top: 4px; }
 .plan-divider { height: 1px; background: var(--bd); margin: 12px 0; }
 
-.agents-panel { margin: 20px 24px 0; background: var(--panel); border: 1px solid var(--bd); border-radius: 12px; padding: 15px 17px; }
+.agents-panel { margin: 20px 24px 0; background: var(--panel-grad); border: 1px solid var(--panel-bd); border-radius: var(--r-panel); box-shadow: 0 1px 0 var(--acc-wash) inset, 0 10px 30px rgba(0, 0, 0, .28); padding: 15px 17px; }
 .agent-lane { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
 .agent-label { width: 96px; font: 500 11px 'JetBrains Mono', monospace; }
 .agent-track { position: relative; flex: 1; height: 15px; background: var(--panel2); border-radius: 5px; }
 .agent-bar { position: absolute; left: 0; height: 100%; border-radius: 5px; background: var(--acc); }
 .agent-bar.active { background: repeating-linear-gradient(90deg, var(--acc2), var(--acc2) 6px, transparent 6px, transparent 11px); animation: flow 1s linear infinite; }
 
-.task-panel { margin: 20px 24px 24px; background: var(--panel); border: 1px solid var(--bd); border-radius: 12px; padding: 15px 17px; }
+.task-panel { margin: 20px 24px 24px; background: var(--panel-grad); border: 1px solid var(--panel-bd); border-radius: var(--r-panel); box-shadow: 0 1px 0 var(--acc-wash) inset, 0 10px 30px rgba(0, 0, 0, .28); padding: 15px 17px; }
 .task-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
 .task-label { width: 88px; font: 500 11px 'JetBrains Mono', monospace; }
 .task-track { flex: 1; height: 9px; background: var(--panel2); border-radius: 5px; overflow: hidden; }
 .task-fill { height: 100%; background: var(--acc); }
 
-.optimize-panel { margin: 20px 24px 0; background: var(--panel); border: 1px solid var(--bd); border-radius: 12px; padding: 15px 17px; }
+.optimize-panel { margin: 20px 24px 0; background: var(--panel-grad); border: 1px solid var(--panel-bd); border-radius: var(--r-panel); box-shadow: 0 1px 0 var(--acc-wash) inset, 0 10px 30px rgba(0, 0, 0, .28); padding: 15px 17px; }
 .optimize-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .optimize-title { font: 700 9.5px 'JetBrains Mono', monospace; letter-spacing: .6px; color: var(--dim); text-transform: uppercase; }
 .optimize-grade { font: 600 10px 'JetBrains Mono', monospace; color: var(--bg); background: var(--warn); border: none; border-radius: 5px; padding: 3px 8px; cursor: pointer; }
 .optimize-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.optimize-card { background: var(--panel2); border-radius: 8px; border-left: 2px solid var(--acc); padding: 11px 12px; display: flex; flex-direction: column; gap: 6px; }
+.optimize-card { background: var(--panel-grad); border: 1px solid var(--panel-bd); border-left: 2px solid var(--acc); border-radius: var(--r-panel); box-shadow: 0 1px 0 var(--acc-wash) inset, 0 10px 30px rgba(0, 0, 0, .28); padding: 11px 12px; display: flex; flex-direction: column; gap: 6px; }
 .optimize-card-title { font: 600 12px system-ui, sans-serif; color: var(--tx); }
 .optimize-card-detail { font: 500 10.5px 'JetBrains Mono', monospace; color: var(--dim); line-height: 1.35; overflow: hidden; overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; }
 .optimize-apply { align-self: flex-start; margin-top: 2px; font: 600 10px 'JetBrains Mono', monospace; color: var(--acc); background: var(--soft); border: 1px solid var(--bd); border-radius: 5px; padding: 3px 8px; cursor: pointer; }
@@ -162,7 +178,7 @@ body { margin: 0; background: var(--bg); color: var(--tx); font-family: system-u
 .optimize-apply-btn.primary { background: var(--acc); color: var(--bg); border: 1px solid var(--acc); }
 .optimize-apply-btn.primary:disabled { opacity: .55; cursor: default; }
 
-.treemap-panel { margin: 20px 24px 24px; background: var(--panel); border: 1px solid var(--bd); border-radius: 12px; padding: 15px 17px; }
+.treemap-panel { margin: 20px 24px 24px; background: var(--panel-grad); border: 1px solid var(--panel-bd); border-radius: var(--r-panel); box-shadow: 0 1px 0 var(--acc-wash) inset, 0 10px 30px rgba(0, 0, 0, .28); padding: 15px 17px; }
 .treemap-row { display: flex; gap: 4px; margin-top: 12px; height: 64px; }
 .treemap-block { display: flex; flex-direction: column; justify-content: flex-end; min-width: 6px; border-radius: 6px; padding: 6px 8px; overflow: hidden; }
 .treemap-cat { font: 600 10px 'JetBrains Mono', monospace; color: var(--bg); white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
@@ -304,7 +320,7 @@ body { margin: 0; background: var(--bg); color: var(--tx); font-family: system-u
 
 /* ---- insights stack ---- */
 .insights-stack { display: flex; flex-direction: column; gap: 14px; margin: 20px 24px 0; }
-.insights-card { background: var(--panel); border: 1px solid var(--bd); border-radius: 12px; padding: 17px 19px; }
+.insights-card { background: var(--panel-grad); border: 1px solid var(--panel-bd); border-radius: var(--r-panel); box-shadow: 0 1px 0 var(--acc-wash) inset, 0 10px 30px rgba(0, 0, 0, .28); padding: 17px 19px; }
 .insights-card.forecast { display: flex; flex-direction: column; }
 .insights-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
 .insights-legend { display: flex; align-items: center; gap: 6px; font: 500 10px 'JetBrains Mono', monospace; color: var(--dim); }

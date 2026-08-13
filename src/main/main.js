@@ -1,5 +1,5 @@
 // src/main/main.js
-const { app, BrowserWindow, ipcMain, dialog, Notification } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Notification, Menu } = require('electron');
 const path = require('node:path');
 const os = require('node:os');
 const { spawnPty } = require('./ptyManager');
@@ -53,6 +53,11 @@ function getLatestCwd() {
 }
 
 app.whenReady().then(async () => {
+  // Native window chrome stays (spec section 8); the reskin's titlebar
+  // replaces only the in-app header, so the default OS/Electron menu bar
+  // above it would be redundant chrome the reskin doesn't style.
+  Menu.setApplicationMenu(null);
+
   await usageScraper.load().catch(() => {});
 
   const { getState } = registerIpcHandlers({
@@ -207,6 +212,8 @@ ipcMain.on('pty:write', (event, input) => {
 ipcMain.on('pty:resize', (event, { cols, rows }) => {
   if (activePty) activePty.resize(cols, rows);
 });
+
+ipcMain.handle('app:getVersion', () => app.getVersion());
 
 let fleetFolderPath = null;
 

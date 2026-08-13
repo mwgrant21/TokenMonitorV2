@@ -17,6 +17,7 @@
     show('hdr-tools', personal);
     show('fleet-pane', !personal);
     show('seats-chip', !personal);
+    show('footer-fleet', !personal);
     const pBtn = document.getElementById('view-personal');
     const tBtn = document.getElementById('view-team');
     if (pBtn) pBtn.classList.toggle('active', personal);
