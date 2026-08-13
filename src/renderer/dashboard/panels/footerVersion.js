@@ -1,11 +1,16 @@
 // src/renderer/dashboard/panels/footerVersion.js
 // Footer version readout + "update available" chip, sourced from
-// version:getStatus (src/main/versionStatus.js, computed on the existing
-// 60s history-rescan tick in main - not a renderer poll). Two of the three
-// states render no chip at all: silence is the reward for being current,
-// and 'unknown' must never look like an error - the share being unreachable
-// isn't the user's problem. Rollout stays manual by design, so the popover
-// only ever says to contact IT - no download, no self-service install.
+// state.versionStatus (built by buildDashboardState in src/main/ipcHandlers.js,
+// computed on the existing 60s history-rescan tick in main - not a renderer
+// poll). Like every other panel, this receives its data through the
+// dashboard:update state fan-out (dashboard.js) rather than fetching its own -
+// an earlier version polled IPC on click only, which meant an update
+// published while the app sat idle stayed invisible until someone happened
+// to open the popover. Two of the three states render no chip at all:
+// silence is the reward for being current, and 'unknown' must never look
+// like an error - the share being unreachable isn't the user's problem.
+// Rollout stays manual by design, so the popover only ever says to contact
+// IT - no download, no self-service install.
 (function () {
   let status = null;
 
@@ -45,12 +50,8 @@
     else el.textContent = `v${status.current}`;
   }
 
-  async function refresh() {
-    try {
-      status = await window.tokenTracker.app.versionStatus();
-    } catch (e) {
-      status = null;
-    }
+  function render(state) {
+    status = state.versionStatus;
     renderChip();
     renderPopover();
     renderSettingsMirror();
@@ -59,7 +60,6 @@
   function openPopover() {
     document.getElementById('footer-version-backdrop').style.display = 'block';
     document.getElementById('footer-version-pop').style.display = 'block';
-    refresh();
   }
 
   function closePopover() {
@@ -81,8 +81,7 @@
     document.getElementById('footer-version-btn').addEventListener('click', togglePopover);
     document.getElementById('footer-update-chip').addEventListener('click', togglePopover);
     document.getElementById('footer-version-backdrop').addEventListener('click', closePopover);
-    await refresh();
   }
 
-  window.TT.footerVersion = { mount };
+  window.TT.footerVersion = { mount, render };
 })();

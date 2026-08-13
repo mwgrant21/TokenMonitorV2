@@ -40,7 +40,7 @@ async function readFileOrEmpty(p) {
 // Single source of truth for dashboard state: used by the 'dashboard:getState'
 // invoke handler AND by main.js's 1-second 'dashboard:update' push timer, so
 // the state-building logic is never duplicated between the two call sites.
-async function buildDashboardState({ liveAggregator, getHistoryEvents, getHistoryAggregator, budgetConfigPath, alertsConfigPath, optimizeStatePath, currentPeriod, getLatestCwd, getPlanUsage, getPlanWarnings }) {
+async function buildDashboardState({ liveAggregator, getHistoryEvents, getHistoryAggregator, budgetConfigPath, alertsConfigPath, optimizeStatePath, currentPeriod, getLatestCwd, getPlanUsage, getPlanWarnings, getVersionStatus }) {
   const windowMs = PERIOD_TO_MS[currentPeriod];
   const historyEvents = getHistoryEvents();
   const historyAggregator = getHistoryAggregator();
@@ -100,6 +100,7 @@ async function buildDashboardState({ liveAggregator, getHistoryEvents, getHistor
 
   return {
     period: currentPeriod,
+    versionStatus: getVersionStatus(),
     heroDeltas,
     insights,
     heroTiles: {
@@ -132,7 +133,7 @@ async function buildDashboardState({ liveAggregator, getHistoryEvents, getHistor
   };
 }
 
-function registerIpcHandlers({ liveAggregator, getHistoryEvents, getHistoryAggregator, budgetConfigPath, themeConfigPath, panelsConfigPath, uiConfigPath, alertsConfigPath, optimizeStatePath, getFleetFolder, getDocumentsDir, getLatestCwd, getPlanUsage, getPlanWarnings }) {
+function registerIpcHandlers({ liveAggregator, getHistoryEvents, getHistoryAggregator, budgetConfigPath, themeConfigPath, panelsConfigPath, uiConfigPath, alertsConfigPath, optimizeStatePath, getFleetFolder, getDocumentsDir, getLatestCwd, getPlanUsage, getPlanWarnings, getVersionStatus }) {
   let currentPeriod = '7d';
 
   ipcMain.handle('dashboard:setPeriod', (_event, period) => {
@@ -207,7 +208,7 @@ function registerIpcHandlers({ liveAggregator, getHistoryEvents, getHistoryAggre
   ipcMain.handle('clipboard:read', () => require('electron').clipboard.readText());
 
   ipcMain.handle('dashboard:getState', () =>
-    buildDashboardState({ liveAggregator, getHistoryEvents, getHistoryAggregator, budgetConfigPath, alertsConfigPath, optimizeStatePath, currentPeriod, getLatestCwd, getPlanUsage, getPlanWarnings })
+    buildDashboardState({ liveAggregator, getHistoryEvents, getHistoryAggregator, budgetConfigPath, alertsConfigPath, optimizeStatePath, currentPeriod, getLatestCwd, getPlanUsage, getPlanWarnings, getVersionStatus })
   );
 
   ipcMain.handle('export:run', async (_event, payload) => {
@@ -233,7 +234,7 @@ function registerIpcHandlers({ liveAggregator, getHistoryEvents, getHistoryAggre
   });
 
   return {
-    getState: () => buildDashboardState({ liveAggregator, getHistoryEvents, getHistoryAggregator, budgetConfigPath, alertsConfigPath, optimizeStatePath, currentPeriod, getLatestCwd, getPlanUsage, getPlanWarnings }),
+    getState: () => buildDashboardState({ liveAggregator, getHistoryEvents, getHistoryAggregator, budgetConfigPath, alertsConfigPath, optimizeStatePath, currentPeriod, getLatestCwd, getPlanUsage, getPlanWarnings, getVersionStatus }),
   };
 }
 

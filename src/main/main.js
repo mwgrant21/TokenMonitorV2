@@ -78,6 +78,7 @@ app.whenReady().then(async () => {
     getLatestCwd,
     getPlanUsage: () => usageScraper.getSnapshot(),
     getPlanWarnings: () => usageScraper.getWarnings(),
+    getVersionStatus: () => versionStatus,
   });
 
   const uiCfg = await loadUiConfig(UI_CONFIG_PATH);
@@ -221,16 +222,17 @@ ipcMain.handle('app:getVersion', () => app.getVersion());
 
 let fleetFolderPath = null;
 
-// Cached, not read-on-request: the periodic tick below refreshes it, so a
-// renderer poll never blocks on an SMB read. Starts 'unknown' rather than
-// guessing 'current' before the first tick has had a chance to check.
+// Cached, not read-on-request: the periodic tick below refreshes it, and it
+// rides the existing dashboard:update state push (buildDashboardState's
+// versionStatus field) rather than its own IPC channel - panels never fetch
+// their own data, they receive it through the state fan-out like every other
+// panel. Starts 'unknown' rather than guessing 'current' before the first
+// tick has had a chance to check.
 let versionStatus = { state: 'unknown', current: app.getVersion(), latest: null, behindBy: null };
 
 async function refreshVersionStatus() {
   versionStatus = await computeVersionStatus(app.getVersion(), fleetFolderPath);
 }
-
-ipcMain.handle('version:getStatus', () => versionStatus);
 
 ipcMain.handle('fleet:pickFolder', async () => {
   const result = await dialog.showOpenDialog({ properties: ['openDirectory'] });
