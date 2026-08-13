@@ -158,14 +158,17 @@ Opened 2026-08-06 while executing reskin Task 4.
 
 ## 7. The self-hosted fonts are loaded but never used
 
-**Status:** open. Closes in Task 7 or 8.
+**Status:** open, partially addressed 2026-08-13 in Task 7. Still closes in Phase 5.
 
 Task 3 vendored Rajdhani and Space Mono and proved they load
 (`test/fonts.test.js`, plus `document.fonts.load()` in a real Chromium context).
 `tokens.css` defines `--f-ui` leading with Rajdhani and `--f-mono` leading with Space
-Mono. But **nothing consumes either token**: `grep -rn 'var(--f-ui)\|var(--f-mono)' src/`
-outside `tokens.css` returns zero hits, against 99 hardcoded `'JetBrains Mono'`
-references in the renderer.
+Mono. Task 7's two new elements consume both - `.footer` uses `var(--f-mono)`,
+`.footer-status` uses `var(--f-ui)` - so this is no longer "nothing consumes either
+token" verbatim. But that is two call sites out of many: `grep -c 'JetBrains Mono'
+src/renderer/dashboard/dashboard.css` still returns 84. The chrome pass (Task 7) only
+had two new elements to style; replacing the other 84 references was never its scope -
+that's the panel/tile typography Phase 5 owns.
 
 So the fonts are fetched and then never rendered. The Rajdhani/Space Mono split is
 described in the plan as "the single biggest carrier of the look" and it is currently
