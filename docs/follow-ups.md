@@ -90,6 +90,32 @@ survive contact with the code it describes.
   with an opaque `Cannot find module` instead of rebuilding. Swapping the two halves
   makes it self-healing.
 
+## 5. Light mode inherits dark-tuned alarm colours — contrast risk
+
+**Status:** open until light-mode alarm UI is rendered and visually verified.
+
+`src/renderer/styles/tokens.css` defines alarm colours (--success, --warn, --danger)
+once in `:root` with dark-mode-optimized pastel values (#3be0a0 green, #f5c66b yellow,
+#ff6b7a red). The prototype file (docs/prototype/index.html) defined distinct
+light-mode versions for each palette (e.g. cyan light: #0f7f55, #96660f, #b3283a).
+These light-tuned values were excluded from tokens.css because alarms must be identical
+across every palette per test/tokens.test.js test 3. This means light mode currently
+inherits the dark-tuned set, which may have inadequate contrast against light
+backgrounds.
+
+**Evidence:** Prototype lines 118/132/146/160/174 contain palette-specific light-mode
+alarm definitions; see docs/prototype/index.html. No alarm-styled UI is rendered yet
+(Phase 1 only wires the token layer), so contrast cannot be verified currently.
+
+**Fix:** When the first task renders alert/warning/danger-coloured UI in light mode,
+verify contrast against WCAG AA for the actual background (token --bg-base varies per
+palette). If contrast is insufficient, either (a) define palette-specific alarm colours
+and modify test 3 to exclude them, or (b) create separate light-tuned alarm tokens
+(--success-light, --warn-light, --danger-light) and wire them in light mode only.
+
+**Owner:** Whichever task first wires alert/warning/danger styling into visible UI
+(likely Phase 3 or later, when panel content renders).
+
 ---
 
 ## Not a code issue: rotate the deployed update token
