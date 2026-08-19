@@ -200,6 +200,55 @@ html[data-pal="carbon"]{
   --tx-muted:#8d8d8d; --tx-dim:#7a7a7a;
   --acc:#4589ff; --acc-deep:#2f6fe0; --acc-ink:#161616;
 }
+html[data-pal="slate"]{
+  --bg-base:#12151b; --flat-panel:#1a1f27; --flat-panel2:#222833; --flat-bd:#333b48;
+  --bg-term:#12151b;
+  --tx-primary:#dfe4ea; --tx-body:#dfe4ea; --tx-secondary:#a0a9b5;
+  --tx-muted:#8892a0; --tx-dim:#76808e;
+  --acc:#7f9cf5; --acc-deep:#4670f1; --acc-ink:#12151b;
+}
+html[data-pal="nord"]{
+  --bg-base:#2e3440; --flat-panel:#353c4a; --flat-panel2:#3b4252; --flat-bd:#4c566a;
+  --bg-term:#2e3440;
+  --tx-primary:#eceff4; --tx-body:#eceff4; --tx-secondary:#b7becc;
+  --tx-muted:#a2abbd; --tx-dim:#9099ab;
+  --acc:#88c0d0; --acc-deep:#5ca9bf; --acc-ink:#2e3440;
+}
+html[data-pal="onedark"]{
+  --bg-base:#21252b; --flat-panel:#282c34; --flat-panel2:#2f343d; --flat-bd:#3b4048;
+  --bg-term:#21252b;
+  --tx-primary:#d7dce4; --tx-body:#d7dce4; --tx-secondary:#989da6;
+  --tx-muted:#7f848e; --tx-dim:#717680;
+  --acc:#61afef; --acc-deep:#2993e9; --acc-ink:#21252b;
+}
+html[data-pal="solarized"]{
+  --bg-base:#002b36; --flat-panel:#073642; --flat-panel2:#0a4552; --flat-bd:#16576a;
+  --bg-term:#002b36;
+  --tx-primary:#eee8d5; --tx-body:#eee8d5; --tx-secondary:#9ca9a3;
+  --tx-muted:#7c918f; --tx-dim:#6a7f7d;
+  --acc:#268bd2; --acc-deep:#1d699e; --acc-ink:#002b36;
+}
+html[data-pal="catppuccin"]{
+  --bg-base:#1e1e2e; --flat-panel:#181825; --flat-panel2:#313244; --flat-bd:#45475a;
+  --bg-term:#1e1e2e;
+  --tx-primary:#cdd6f4; --tx-body:#cdd6f4; --tx-secondary:#959bb5;
+  --tx-muted:#7f849c; --tx-dim:#6d728a;
+  --acc:#89b4fa; --acc-deep:#4e8ff8; --acc-ink:#1e1e2e;
+}
+html[data-pal="github"]{
+  --bg-base:#0d1117; --flat-panel:#161b22; --flat-panel2:#21262d; --flat-bd:#30363d;
+  --bg-term:#0d1117;
+  --tx-primary:#e6edf3; --tx-body:#e6edf3; --tx-secondary:#9aa2ac;
+  --tx-muted:#7d8590; --tx-dim:#6b737e;
+  --acc:#2f81f7; --acc-deep:#0961e0; --acc-ink:#0d1117;
+}
+html[data-pal="graphite"]{
+  --bg-base:#1c1c1e; --flat-panel:#242426; --flat-panel2:#2d2d30; --flat-bd:#3a3a3d;
+  --bg-term:#1c1c1e;
+  --tx-primary:#ececec; --tx-body:#ececec; --tx-secondary:#a8a8ac;
+  --tx-muted:#8e8e93; --tx-dim:#7c7c81;
+  --acc:#0a84ff; --acc-deep:#0065cc; --acc-ink:#1c1c1e;
+}
 
 /* ---------------------------------------------------------------------------
    Compatibility aliases: v1's ten palette variables mapped onto the new names.

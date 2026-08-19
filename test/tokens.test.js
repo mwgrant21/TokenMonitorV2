@@ -23,6 +23,17 @@ const TOKENS = [
 
 const AETHER = ['cyan', 'azure', 'violet', 'emerald', 'steel'];
 
+const LEGACY = ['midnight', 'slate', 'carbon', 'nord', 'onedark',
+                'solarized', 'catppuccin', 'github', 'graphite'];
+
+// The thirteen flat-language tokens each legacy palette must define, per the
+// mapping table derived from the midnight/carbon worked examples.
+const FLAT_LANGUAGE = [
+  'bg-base', 'flat-panel', 'flat-panel2', 'flat-bd', 'bg-term',
+  'tx-primary', 'tx-body', 'tx-secondary', 'tx-muted', 'tx-dim',
+  'acc', 'acc-deep', 'acc-ink',
+];
+
 function blockFor(selector) {
   const i = CSS.indexOf(selector);
   assert.notStrictEqual(i, -1, `selector not found: ${selector}`);
@@ -51,6 +62,17 @@ test('every Aether palette defines a full colour set in both modes', () => {
       for (const t of PER_PALETTE) {
         if (!body.includes(`--${t}:`)) problems.push(`${pal}/${mode} missing --${t}`);
       }
+    }
+  }
+  assert.deepStrictEqual(problems, []);
+});
+
+test('every legacy palette defines the thirteen flat-language tokens', () => {
+  const problems = [];
+  for (const pal of LEGACY) {
+    const body = blockFor(`html[data-pal="${pal}"]`);
+    for (const t of FLAT_LANGUAGE) {
+      if (!body.includes(`--${t}:`)) problems.push(`${pal} missing --${t}`);
     }
   }
   assert.deepStrictEqual(problems, []);
