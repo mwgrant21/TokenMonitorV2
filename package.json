@@ -8,7 +8,7 @@
   "workspaces": ["packages/*"],
   "scripts": {
     "start": "electron .",
-    "postinstall": "node scripts/grant-appcontainer-acl.js",
+    "postinstall": "install-electron && node scripts/grant-appcontainer-acl.js",
     "test": "node --test \"test/*.test.js\" && npm test --workspace @tokenmonitor/core",
     "build:core": "npm run build --workspace @tokenmonitor/core",
     "dist": "node scripts/dist.js"
@@ -20,7 +20,7 @@
     "xterm-addon-fit": "^0.8.0"
   },
   "devDependencies": {
-    "electron": "^43.0.0",
+    "electron": "43.4.1",
     "electron-builder": "^26.15.3"
   }
 }
