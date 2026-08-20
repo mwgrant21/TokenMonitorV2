@@ -206,6 +206,50 @@ mode is preserved untouched and re-applies as soon as an Aether palette is selec
 
 ---
 
+## 7. Flat-language `box-shadow:none` override targets classes that don't exist in this app
+
+**Status:** open. Cosmetic; was inert before Task 7 and remains inert after, not a regression.
+
+`src/renderer/styles/tokens.css:179-181` reads:
+```css
+html[data-lang="flat"] .panel,
+html[data-lang="flat"] .tile,
+html[data-lang="flat"] .reactor-panel{ box-shadow:none !important; }
+```
+This was copied from the prototype, which uses `.panel`/`.tile`/`.reactor-panel` as its actual
+panel class names. This app never has and does not now use those class names anywhere — its
+panels are `.hero-tile`, `.budget-panel`, `.agents-panel`, `.task-panel`, `.optimize-panel`,
+`.treemap-panel`, `.insights-card`, `.optimize-card` (confirmed by a full-tree grep: the only hit
+for `.panel`/`.tile`/`.reactor-panel` in `src/renderer` is this rule itself). Before Task 7, this
+was harmless because no panel had a `box-shadow` to suppress. Task 7's panel formula
+(`background: var(--panel-grad); border: var(--panel-bd); box-shadow: 0 1px 0 var(--acc-wash)
+inset, 0 10px 30px rgba(0,0,0,.28)`) now gives all 8 of those panels a real shadow, and this
+override still can't reach any of them — so legacy/flat palettes render a drop shadow the
+prototype's own design intended to suppress on flat surfaces. Subtle in practice (dark shadow
+against typically-dark legacy palettes) but a real, now-live visual gap.
+
+**Fix:** retarget the selector at this app's actual panel classes. Each selector must be
+individually prefixed with `html[data-lang="flat"]` — a bare comma-separated list where only the
+first selector carries the prefix would make the rest match globally in every language/palette,
+stripping Task 7's panel shadow everywhere instead of only on flat surfaces:
+```css
+html[data-lang="flat"] .hero-tile,
+html[data-lang="flat"] .budget-panel,
+html[data-lang="flat"] .agents-panel,
+html[data-lang="flat"] .task-panel,
+html[data-lang="flat"] .optimize-panel,
+html[data-lang="flat"] .treemap-panel,
+html[data-lang="flat"] .insights-card,
+html[data-lang="flat"] .optimize-card{ box-shadow:none !important; }
+```
+(equivalently, `html[data-lang="flat"] :is(.hero-tile, .budget-panel, .agents-panel, .task-panel,
+.optimize-panel, .treemap-panel, .insights-card, .optimize-card)`)
+
+**Owner:** unassigned — not in scope for any of the 8 tasks in `docs/plans/2026-08-05-reskin-
+phases-3-4.md`. Small, one-line fix; pick up opportunistically or as its own quick task.
+
+---
+
 ## Not a code issue: rotate the deployed update token
 
 **Owner: Matt. Not actionable in this repo.**
