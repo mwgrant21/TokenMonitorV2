@@ -7,10 +7,21 @@
 // (node_modules/xterm/lib/xterm.js), which attaches `Terminal` to the global
 // scope. Behavior and structure otherwise match the plan.
 function mountTerminal(containerEl) {
+  // Read the initial theme from tokens.css's computed custom properties instead of
+  // hardcoding literals, so the very first paint already matches the active palette
+  // (data-pal/data-mode on <html>) rather than always starting dark. Same read
+  // pattern as applyTerminalTheme() below.
+  const initialCs = getComputedStyle(document.documentElement);
+  const initialBackground = initialCs.getPropertyValue('--bg-term').trim();
+  const initialForeground = initialCs.getPropertyValue('--tx-primary').trim();
+  // xterm takes a plain font-family string, not a CSS var(), so read the resolved
+  // --f-mono the same way. Aether palettes give Space Mono, flat/legacy ones give
+  // JetBrains Mono; the literal below is only the CSS-not-ready fallback.
+  const initialFont = initialCs.getPropertyValue('--f-mono').trim();
   const term = new Terminal({
-    fontFamily: "'JetBrains Mono', monospace",
+    fontFamily: initialFont || "'JetBrains Mono', monospace",
     fontSize: 12.5,
-    theme: { background: '#0b0e14', foreground: '#e7ebf3' },
+    theme: { background: initialBackground, foreground: initialForeground },
   });
   const fit = new FitAddon.FitAddon(); // UMD global from xterm-addon-fit script tag
   term.loadAddon(fit);
@@ -75,13 +86,24 @@ function mountTerminal(containerEl) {
 }
 
 // Recolor the xterm instance from the active CSS palette. The CSS palette
-// ([data-palette] on <html>) is the single source of truth; we only read the
-// computed variables here, never hardcode a second copy of the colors.
+// (data-pal/data-mode on <html>, defined in tokens.css) is the single source of
+// truth; we only read the computed variables here, never hardcode a second copy
+// of the colors. Reads the same --bg-term/--tx-primary the constructor above
+// uses, so the mounted terminal never disagrees with its own first paint.
 function applyTerminalTheme(term) {
   const cs = getComputedStyle(document.documentElement);
-  const background = cs.getPropertyValue('--bg').trim();
-  const foreground = cs.getPropertyValue('--tx').trim();
+  const background = cs.getPropertyValue('--bg-term').trim();
+  const foreground = cs.getPropertyValue('--tx-primary').trim();
   const cursor = cs.getPropertyValue('--acc').trim();
+  const fontFamily = cs.getPropertyValue('--f-mono').trim();
   if (!background) return; // CSS not ready; keep constructor defaults
   term.options.theme = { background, foreground, cursor };
+  // Aether <-> legacy palette switches also swap --f-mono, so follow it here or the
+  // terminal keeps the previous palette's typeface until the app restarts. A new family
+  // means new cell metrics, so refit -- otherwise the grid keeps the old font's rows/cols
+  // and the pty's size drifts out of lockstep with what is drawn.
+  if (fontFamily && term.options.fontFamily !== fontFamily) {
+    term.options.fontFamily = fontFamily;
+    if (typeof window.__ttFit === 'function') window.__ttFit();
+  }
 }

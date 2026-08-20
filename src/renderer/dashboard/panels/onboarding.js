@@ -109,18 +109,14 @@
     }
   }
 
+  // Chips are painted by settingsPanel.js's swatchButtonHtml, which reads the
+  // colours out of tokens.css at runtime - onboarding must not keep a second copy.
   function renderObSwatches() {
     const grid = document.getElementById('ob-swatch-grid');
-    if (!grid || typeof THEME_PALETTES === 'undefined') return;
-    const active = document.documentElement.dataset.palette || 'midnight';
-    grid.innerHTML = THEME_PALETTES.map((p) => `
-      <button type="button" class="swatch-btn" data-slug="${esc(p.slug)}" title="${esc(p.label)}"
-        style="display:flex;flex-direction:column;align-items:center;gap:4px;background:transparent;border:none;padding:2px;cursor:pointer">
-        <span style="width:34px;height:34px;border-radius:9px;background:${esc(p.bg)};border:2px solid ${p.slug === active ? 'var(--acc)' : 'transparent'};display:flex;align-items:center;justify-content:center">
-          <span style="width:12px;height:12px;border-radius:50%;background:${esc(p.acc)}"></span>
-        </span>
-        <span style="font:500 9px 'JetBrains Mono',monospace;color:var(--dim)">${esc(p.label)}</span>
-      </button>`).join('');
+    if (!grid || typeof THEME_PALETTES === 'undefined' || typeof swatchButtonHtml !== 'function') return;
+    const active = currentPalette();
+    const colors = swatchColors(currentMode());
+    grid.innerHTML = THEME_PALETTES.map((p) => swatchButtonHtml(p, active, colors)).join('');
   }
 
   const TH_STEPS = { thBudget: 5, thBurn: 0.5, thWaste: 5, thAgent: 25 };

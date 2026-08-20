@@ -1,0 +1,276 @@
+/* src/renderer/styles/tokens.css
+   Copied from docs/prototype/index.html, alarm colours included.
+
+   Alarm colours (--success, --warn, --danger) come in exactly two sets, one per mode:
+     - dark   : the :root set (#3be0a0 / #f5c66b / #ff6b7a), inherited unchanged by all
+                five Aether dark palettes and by every legacy [data-lang="flat"] palette.
+     - light  : #0f7f55 / #96660f / #b3283a, copied verbatim from the prototype's five
+                light-mode blocks (prototype lines 118/132/146/160/174) and repeated
+                identically in each Aether light palette below.
+   The rule an alert must mean the same thing on every desk still holds -- it is now scoped
+   per mode, because the dark-tuned pastels measured as low as 1.41:1 on a light background
+   (.alert-row.critical). Enforced by test/tokens.test.js ("alarm colours are identical across
+   every palette in the same mode"). Do NOT re-derive the light triple by hand; copy it from
+   the prototype. Closed docs/follow-ups.md item 5; the residue is tracked as item 8. */
+
+:root{
+  --f-ui:'Rajdhani', Bahnschrift, 'Segoe UI Variable Display', 'Segoe UI', system-ui, sans-serif;
+  --f-mono:'Space Mono', 'JetBrains Mono', 'Cascadia Mono', Consolas, monospace;
+  --r-panel:14px; --r-tile:9px; --r-chip:7px;
+  --pulse-dur:2.4s;
+  --success:#3be0a0; --warn:#f5c66b; --danger:#ff6b7a;
+  --alarm:var(--success); --alarm-glow:rgba(59,224,160,.5);
+}
+html[data-pal="cyan"][data-mode="dark"]{
+  --bg-base:#020a10;
+  --page-radial:radial-gradient(1400px 900px at 60% -10%, #0a2634 0%, #04121a 55%, #020a10 100%);
+  --panel-grad:linear-gradient(180deg, rgba(9,28,38,.8), rgba(6,18,26,.8));
+  --panel-bd:rgba(70,180,215,.24); --panel-inset:rgba(6,20,28,.7);
+  --chrome-bg:rgba(4,16,24,.6); --chrome-bd:rgba(70,180,215,.16);
+  --chip-bd:rgba(80,190,220,.25); --active-bd:rgba(95,220,255,.4);
+  --bg-term:#06141c;
+  --tx-primary:#eafcff; --tx-body:#d8f6ff; --tx-secondary:#9fc4d1;
+  --tx-muted:#5f8a97; --tx-dim:#4e7c8b;
+  --acc:#7ef0ff; --acc-deep:#17b8d8; --acc-ink:#04202b;
+  --acc-glow:rgba(95,240,255,.4); --acc-wash:rgba(23,184,216,.14);
+}
+/* --- AZURE (closest to today's TokenMonitor blue) --- */
+html[data-pal="azure"][data-mode="dark"]{
+  --bg-base:#05080f;
+  --page-radial:radial-gradient(1400px 900px at 60% -10%, #131f3c 0%, #0a1122 55%, #05080f 100%);
+  --panel-grad:linear-gradient(180deg, rgba(16,24,48,.82), rgba(10,15,30,.82));
+  --panel-bd:rgba(110,140,235,.24); --panel-inset:rgba(11,16,32,.7);
+  --chrome-bg:rgba(8,12,26,.6); --chrome-bd:rgba(110,140,235,.16);
+  --chip-bd:rgba(120,150,240,.25); --active-bd:rgba(150,175,255,.42);
+  --bg-term:#080d19;
+  --tx-primary:#eef2ff; --tx-body:#dce3ff; --tx-secondary:#a8b4dd;
+  --tx-muted:#6d78a3; --tx-dim:#5b6690;
+  --acc:#9db4ff; --acc-deep:#4f6fe0; --acc-ink:#060a1a;
+  --acc-glow:rgba(140,165,255,.42); --acc-wash:rgba(79,111,224,.16);
+}
+/* --- VIOLET --- */
+html[data-pal="violet"][data-mode="dark"]{
+  --bg-base:#08050f;
+  --page-radial:radial-gradient(1400px 900px at 60% -10%, #241340 0%, #130a24 55%, #08050f 100%);
+  --panel-grad:linear-gradient(180deg, rgba(28,17,48,.82), rgba(17,10,30,.82));
+  --panel-bd:rgba(160,110,235,.24); --panel-inset:rgba(18,11,32,.7);
+  --chrome-bg:rgba(13,8,24,.6); --chrome-bd:rgba(160,110,235,.16);
+  --chip-bd:rgba(175,125,240,.26); --active-bd:rgba(200,150,255,.42);
+  --bg-term:#0d0818;
+  --tx-primary:#f6eeff; --tx-body:#ebdcff; --tx-secondary:#bda8dd;
+  --tx-muted:#836da3; --tx-dim:#6f5b90;
+  --acc:#c89dff; --acc-deep:#8a4fe0; --acc-ink:#12061f;
+  --acc-glow:rgba(190,140,255,.42); --acc-wash:rgba(138,79,224,.16);
+}
+/* --- EMERALD --- */
+html[data-pal="emerald"][data-mode="dark"]{
+  --bg-base:#020f0a;
+  --page-radial:radial-gradient(1400px 900px at 60% -10%, #0a3226 0%, #041c14 55%, #020f0a 100%);
+  --panel-grad:linear-gradient(180deg, rgba(9,38,28,.82), rgba(6,24,18,.82));
+  --panel-bd:rgba(70,205,150,.24); --panel-inset:rgba(6,26,20,.7);
+  --chrome-bg:rgba(4,20,15,.6); --chrome-bd:rgba(70,205,150,.16);
+  --chip-bd:rgba(80,215,160,.25); --active-bd:rgba(105,240,185,.42);
+  --bg-term:#051a13;
+  --tx-primary:#eafff5; --tx-body:#d5ffec; --tx-secondary:#9dcdb8;
+  --tx-muted:#5f9781; --tx-dim:#4e8570;
+  --acc:#6ff0bc; --acc-deep:#12a878; --acc-ink:#032118;
+  --acc-glow:rgba(95,240,190,.4); --acc-wash:rgba(18,168,120,.16);
+}
+/* --- STEEL (no hue; the conservative default) --- */
+html[data-pal="steel"][data-mode="dark"]{
+  --bg-base:#0a0c0d;
+  --page-radial:radial-gradient(1400px 900px at 60% -10%, #232a2e 0%, #14181a 55%, #0a0c0d 100%);
+  --panel-grad:linear-gradient(180deg, rgba(31,36,40,.84), rgba(19,23,26,.84));
+  --panel-bd:rgba(170,190,200,.2); --panel-inset:rgba(20,24,27,.72);
+  --chrome-bg:rgba(15,18,20,.62); --chrome-bd:rgba(170,190,200,.14);
+  --chip-bd:rgba(180,200,210,.22); --active-bd:rgba(215,232,240,.38);
+  --bg-term:#101315;
+  --tx-primary:#f2f6f8; --tx-body:#e2e9ec; --tx-secondary:#adb9be;
+  --tx-muted:#78868c; --tx-dim:#68767c;
+  --acc:#d7e6ec; --acc-deep:#8ea3ac; --acc-ink:#12171a;
+  --acc-glow:rgba(215,232,240,.3); --acc-wash:rgba(142,163,172,.16);
+}
+
+/* ================= LIGHT ================= */
+
+html[data-pal="cyan"][data-mode="light"]{
+  --bg-base:#eaf6fb;
+  --page-radial:radial-gradient(1400px 900px at 60% -10%, #d8ecf4 0%, #eef8fc 55%, #f5fbfd 100%);
+  --panel-grad:linear-gradient(180deg, rgba(255,255,255,.9), rgba(235,248,252,.9));
+  --panel-bd:rgba(23,140,180,.26); --panel-inset:rgba(255,255,255,.78);
+  --chrome-bg:rgba(255,255,255,.72); --chrome-bd:rgba(23,140,180,.18);
+  --chip-bd:rgba(23,140,180,.28); --active-bd:rgba(10,120,160,.5);
+  --bg-term:#f5fbfd;
+  --tx-primary:#04222c; --tx-body:#0c3540; --tx-secondary:#3c6a76;
+  --tx-muted:#5c828c; --tx-dim:#6f939c;
+  --acc:#0a90a8; --acc-deep:#0c7f95; --acc-ink:#ffffff;
+  --acc-glow:rgba(10,144,168,.3); --acc-wash:rgba(10,144,168,.1);
+  /* Light-mode alarm triple, verbatim from docs/prototype/index.html. Identical in all
+     five Aether light palettes; dark mode keeps the shared :root set. */
+  --success:#0f7f55; --warn:#96660f; --danger:#b3283a;
+}
+html[data-pal="azure"][data-mode="light"]{
+  --bg-base:#eef1fa;
+  --page-radial:radial-gradient(1400px 900px at 60% -10%, #dee5f8 0%, #f0f3fc 55%, #f7f9fe 100%);
+  --panel-grad:linear-gradient(180deg, rgba(255,255,255,.9), rgba(240,243,252,.9));
+  --panel-bd:rgba(70,100,200,.26); --panel-inset:rgba(255,255,255,.78);
+  --chrome-bg:rgba(255,255,255,.72); --chrome-bd:rgba(70,100,200,.18);
+  --chip-bd:rgba(70,100,200,.28); --active-bd:rgba(50,80,190,.5);
+  --bg-term:#f7f9fe;
+  --tx-primary:#0b1330; --tx-body:#182247; --tx-secondary:#4a5578;
+  --tx-muted:#6b7597; --tx-dim:#7c86a6;
+  --acc:#3a5bd0; --acc-deep:#2b46ab; --acc-ink:#ffffff;
+  --acc-glow:rgba(58,91,208,.3); --acc-wash:rgba(58,91,208,.1);
+  /* Light-mode alarm triple, verbatim from docs/prototype/index.html. Identical in all
+     five Aether light palettes; dark mode keeps the shared :root set. */
+  --success:#0f7f55; --warn:#96660f; --danger:#b3283a;
+}
+html[data-pal="violet"][data-mode="light"]{
+  --bg-base:#f3eefa;
+  --page-radial:radial-gradient(1400px 900px at 60% -10%, #e8dcf7 0%, #f4eefb 55%, #faf6fd 100%);
+  --panel-grad:linear-gradient(180deg, rgba(255,255,255,.9), rgba(246,240,252,.9));
+  --panel-bd:rgba(130,80,200,.26); --panel-inset:rgba(255,255,255,.78);
+  --chrome-bg:rgba(255,255,255,.72); --chrome-bd:rgba(130,80,200,.18);
+  --chip-bd:rgba(130,80,200,.28); --active-bd:rgba(110,60,185,.5);
+  --bg-term:#faf6fd;
+  --tx-primary:#210b33; --tx-body:#33184a; --tx-secondary:#614a7a;
+  --tx-muted:#806a99; --tx-dim:#8f7ba6;
+  --acc:#7a3fc9; --acc-deep:#602ea6; --acc-ink:#ffffff;
+  --acc-glow:rgba(122,63,201,.3); --acc-wash:rgba(122,63,201,.1);
+  /* Light-mode alarm triple, verbatim from docs/prototype/index.html. Identical in all
+     five Aether light palettes; dark mode keeps the shared :root set. */
+  --success:#0f7f55; --warn:#96660f; --danger:#b3283a;
+}
+html[data-pal="emerald"][data-mode="light"]{
+  --bg-base:#e9f8f1;
+  --page-radial:radial-gradient(1400px 900px at 60% -10%, #d6f0e4 0%, #ecf9f3 55%, #f4fcf8 100%);
+  --panel-grad:linear-gradient(180deg, rgba(255,255,255,.9), rgba(236,249,243,.9));
+  --panel-bd:rgba(20,140,100,.26); --panel-inset:rgba(255,255,255,.78);
+  --chrome-bg:rgba(255,255,255,.72); --chrome-bd:rgba(20,140,100,.18);
+  --chip-bd:rgba(20,140,100,.28); --active-bd:rgba(12,120,85,.5);
+  --bg-term:#f4fcf8;
+  --tx-primary:#042318; --tx-body:#0c3728; --tx-secondary:#3c6f5c;
+  --tx-muted:#5c8a78; --tx-dim:#6f9a88;
+  --acc:#0d8f63; --acc-deep:#0a7350; --acc-ink:#ffffff;
+  --acc-glow:rgba(13,143,99,.3); --acc-wash:rgba(13,143,99,.1);
+  /* Light-mode alarm triple, verbatim from docs/prototype/index.html. Identical in all
+     five Aether light palettes; dark mode keeps the shared :root set. */
+  --success:#0f7f55; --warn:#96660f; --danger:#b3283a;
+}
+html[data-pal="steel"][data-mode="light"]{
+  --bg-base:#eff1f2;
+  --page-radial:radial-gradient(1400px 900px at 60% -10%, #e2e6e8 0%, #f0f2f3 55%, #f7f8f9 100%);
+  --panel-grad:linear-gradient(180deg, rgba(255,255,255,.92), rgba(241,243,244,.92));
+  --panel-bd:rgba(90,105,112,.24); --panel-inset:rgba(255,255,255,.8);
+  --chrome-bg:rgba(255,255,255,.74); --chrome-bd:rgba(90,105,112,.16);
+  --chip-bd:rgba(90,105,112,.26); --active-bd:rgba(60,75,82,.46);
+  --bg-term:#f7f8f9;
+  --tx-primary:#12171a; --tx-body:#20272b; --tx-secondary:#4e585d;
+  --tx-muted:#6d777c; --tx-dim:#7d878c;
+  --acc:#41525a; --acc-deep:#2c3a41; --acc-ink:#ffffff;
+  --acc-glow:rgba(65,82,90,.26); --acc-wash:rgba(65,82,90,.09);
+  /* Light-mode alarm triple, verbatim from docs/prototype/index.html. Identical in all
+     five Aether light palettes; dark mode keeps the shared :root set. */
+  --success:#0f7f55; --warn:#96660f; --danger:#b3283a;
+}
+html[data-lang="flat"]{
+  --f-ui:system-ui, -apple-system, sans-serif;
+  --f-mono:'JetBrains Mono', Consolas, monospace;
+  --r-panel:12px; --r-tile:8px; --r-chip:6px;
+  --page-radial:none;
+  --panel-grad:var(--flat-panel);
+  --panel-inset:var(--flat-panel2);
+  --chrome-bg:var(--flat-panel);
+  --panel-bd:var(--flat-bd); --chrome-bd:var(--flat-bd); --chip-bd:var(--flat-bd);
+  --active-bd:var(--acc);
+  --acc-glow:transparent; --acc-wash:rgba(255,255,255,.05);
+}
+html[data-lang="flat"] .panel,
+html[data-lang="flat"] .tile,
+html[data-lang="flat"] .reactor-panel{ box-shadow:none !important; }
+html[data-lang="flat"] .tile::before{ display:none; }
+html[data-lang="flat"] .titlebar{ backdrop-filter:none; }
+html[data-lang="flat"] .fill,
+html[data-lang="flat"] .lane-bar.active,
+html[data-lang="flat"] .seg button.active{ box-shadow:none !important; }
+html[data-lang="flat"] .term-body::after{ display:none; }
+
+html[data-pal="midnight"]{
+  --bg-base:#0b0e14; --flat-panel:#10151e; --flat-panel2:#151b26; --flat-bd:#222b3a;
+  --bg-term:#0b0e14;
+  --tx-primary:#e7ebf3; --tx-body:#e7ebf3; --tx-secondary:#9aa4b5;
+  --tx-muted:#7d8799; --tx-dim:#6c7688;
+  --acc:#5b8cff; --acc-deep:#3f6fe0; --acc-ink:#0b0e14;
+}
+html[data-pal="carbon"]{
+  --bg-base:#161616; --flat-panel:#212121; --flat-panel2:#292929; --flat-bd:#393939;
+  --bg-term:#161616;
+  --tx-primary:#f4f4f4; --tx-body:#f4f4f4; --tx-secondary:#a8a8a8;
+  --tx-muted:#8d8d8d; --tx-dim:#7a7a7a;
+  --acc:#4589ff; --acc-deep:#2f6fe0; --acc-ink:#161616;
+}
+html[data-pal="slate"]{
+  --bg-base:#12151b; --flat-panel:#1a1f27; --flat-panel2:#222833; --flat-bd:#333b48;
+  --bg-term:#12151b;
+  --tx-primary:#dfe4ea; --tx-body:#dfe4ea; --tx-secondary:#a0a9b5;
+  --tx-muted:#8892a0; --tx-dim:#76808e;
+  --acc:#7f9cf5; --acc-deep:#4670f1; --acc-ink:#12151b;
+}
+html[data-pal="nord"]{
+  --bg-base:#2e3440; --flat-panel:#353c4a; --flat-panel2:#3b4252; --flat-bd:#4c566a;
+  --bg-term:#2e3440;
+  --tx-primary:#eceff4; --tx-body:#eceff4; --tx-secondary:#b7becc;
+  --tx-muted:#a2abbd; --tx-dim:#9099ab;
+  --acc:#88c0d0; --acc-deep:#5ca9bf; --acc-ink:#2e3440;
+}
+html[data-pal="onedark"]{
+  --bg-base:#21252b; --flat-panel:#282c34; --flat-panel2:#2f343d; --flat-bd:#3b4048;
+  --bg-term:#21252b;
+  --tx-primary:#d7dce4; --tx-body:#d7dce4; --tx-secondary:#989da6;
+  --tx-muted:#7f848e; --tx-dim:#717680;
+  --acc:#61afef; --acc-deep:#2993e9; --acc-ink:#21252b;
+}
+html[data-pal="solarized"]{
+  --bg-base:#002b36; --flat-panel:#073642; --flat-panel2:#0a4552; --flat-bd:#16576a;
+  --bg-term:#002b36;
+  --tx-primary:#eee8d5; --tx-body:#eee8d5; --tx-secondary:#9ca9a3;
+  --tx-muted:#7c918f; --tx-dim:#6a7f7d;
+  --acc:#268bd2; --acc-deep:#1d699e; --acc-ink:#002b36;
+}
+html[data-pal="catppuccin"]{
+  --bg-base:#1e1e2e; --flat-panel:#181825; --flat-panel2:#313244; --flat-bd:#45475a;
+  --bg-term:#1e1e2e;
+  --tx-primary:#cdd6f4; --tx-body:#cdd6f4; --tx-secondary:#959bb5;
+  --tx-muted:#7f849c; --tx-dim:#6d728a;
+  --acc:#89b4fa; --acc-deep:#4e8ff8; --acc-ink:#1e1e2e;
+}
+html[data-pal="github"]{
+  --bg-base:#0d1117; --flat-panel:#161b22; --flat-panel2:#21262d; --flat-bd:#30363d;
+  --bg-term:#0d1117;
+  --tx-primary:#e6edf3; --tx-body:#e6edf3; --tx-secondary:#9aa2ac;
+  --tx-muted:#7d8590; --tx-dim:#6b737e;
+  --acc:#2f81f7; --acc-deep:#0961e0; --acc-ink:#0d1117;
+}
+html[data-pal="graphite"]{
+  --bg-base:#1c1c1e; --flat-panel:#242426; --flat-panel2:#2d2d30; --flat-bd:#3a3a3d;
+  --bg-term:#1c1c1e;
+  --tx-primary:#ececec; --tx-body:#ececec; --tx-secondary:#a8a8ac;
+  --tx-muted:#8e8e93; --tx-dim:#7c7c81;
+  --acc:#0a84ff; --acc-deep:#0065cc; --acc-ink:#1c1c1e;
+}
+
+/* ---------------------------------------------------------------------------
+   Compatibility aliases: v1's ten palette variables mapped onto the new names.
+   Every existing rule in dashboard.css resolves through these unchanged.
+   DELETED in the final slice of Phase 5, once no rule references them.
+   --------------------------------------------------------------------------- */
+:root {
+  --bg:     var(--bg-base);
+  --panel:  var(--panel-grad);
+  --panel2: var(--panel-inset);
+  --bd:     var(--panel-bd);
+  --tx:     var(--tx-primary);
+  --dim:    var(--tx-dim);
+  --soft:   var(--acc-wash);
+  --acc2:   var(--acc-deep);
+}
