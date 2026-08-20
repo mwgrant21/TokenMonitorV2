@@ -115,17 +115,23 @@ function renderSwatches() {
 // The nine legacy palettes are declared in tokens.css without a [data-mode]
 // qualifier, so they render identically in both modes. Rather than let the
 // control look broken, it is disabled (and says why) while one is active.
+//
+// The highlighted segment shows the mode actually being RENDERED, not the one
+// stored: a legacy palette always renders dark, whatever mode is on disk. The
+// stored mode is deliberately left untouched so it comes back the moment an
+// Aether palette is picked again - only the highlight is suppressed, so the
+// control can never assert a state the app is not in.
 function renderModeControl() {
   const seg = document.getElementById('mode-seg');
   if (!seg) return;
-  const mode = currentMode();
   const flat = langForPalette(currentPalette()) === 'flat';
+  const shown = flat ? 'dark' : currentMode();
   const why = flat
     ? 'Light mode applies to the Aether palettes only'
     : 'Switch between light and dark';
   seg.classList.toggle('disabled', flat);
   seg.innerHTML = THEME_MODES.map((m) => `
-      <button type="button" class="mode-btn${m.mode === mode ? ' active' : ''}" data-mode="${escapeHtml(m.mode)}"
+      <button type="button" class="mode-btn${m.mode === shown ? ' active' : ''}" data-mode="${escapeHtml(m.mode)}"
         title="${escapeHtml(why)}"${flat ? ' disabled' : ''}>${escapeHtml(m.label)}</button>`).join('');
 }
 
