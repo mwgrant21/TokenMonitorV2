@@ -82,12 +82,14 @@ function mountTerminal(containerEl) {
 }
 
 // Recolor the xterm instance from the active CSS palette. The CSS palette
-// ([data-palette] on <html>) is the single source of truth; we only read the
-// computed variables here, never hardcode a second copy of the colors.
+// (data-pal/data-mode on <html>, defined in tokens.css) is the single source of
+// truth; we only read the computed variables here, never hardcode a second copy
+// of the colors. Reads the same --bg-term/--tx-primary the constructor above
+// uses, so the mounted terminal never disagrees with its own first paint.
 function applyTerminalTheme(term) {
   const cs = getComputedStyle(document.documentElement);
-  const background = cs.getPropertyValue('--bg').trim();
-  const foreground = cs.getPropertyValue('--tx').trim();
+  const background = cs.getPropertyValue('--bg-term').trim();
+  const foreground = cs.getPropertyValue('--tx-primary').trim();
   const cursor = cs.getPropertyValue('--acc').trim();
   if (!background) return; // CSS not ready; keep constructor defaults
   term.options.theme = { background, foreground, cursor };

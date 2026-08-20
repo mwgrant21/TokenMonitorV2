@@ -14,7 +14,7 @@ const {
 const { loadOptimizeState } = require('../shared/optimizeState');
 const { loadBudgetConfig, saveBudgetConfig } = require('../shared/budgetConfig');
 const { deriveBudgetsFromMonthly } = require('../shared/budgetDerive');
-const { loadThemeConfig, saveThemeConfig, KNOWN_PALETTES } = require('../shared/themeConfig');
+const { loadThemeConfig, saveThemeConfig, KNOWN_PALETTES, KNOWN_MODES } = require('../shared/themeConfig');
 const { loadPanelsConfig, savePanelsConfig } = require('../shared/panelsConfig');
 const { loadUiConfig, saveUiConfig } = require('../shared/uiConfig');
 const { loadAlertsConfig, saveAlertsConfig, RANGES } = require('../shared/alertsConfig');
@@ -155,11 +155,16 @@ function registerIpcHandlers({ liveAggregator, getHistoryEvents, getHistoryAggre
   ipcMain.handle('budget:deriveFromMonthly', (_event, monthlyTokens) => deriveBudgetsFromMonthly(monthlyTokens));
 
   ipcMain.handle('theme:get', () => loadThemeConfig(themeConfigPath));
+  // theme and mode are independent axes: a payload that carries only one must
+  // leave the other at its persisted value, or changing the palette would silently
+  // reset the user's light/dark choice (saveThemeConfig defaults an absent mode).
   ipcMain.handle('theme:set', async (_event, payload) => {
     const current = await loadThemeConfig(themeConfigPath);
-    const incoming = payload && payload.theme;
-    const theme = KNOWN_PALETTES.includes(incoming) ? incoming : current.theme;
-    return saveThemeConfig(themeConfigPath, { theme });
+    const incomingTheme = payload && payload.theme;
+    const incomingMode = payload && payload.mode;
+    const theme = KNOWN_PALETTES.includes(incomingTheme) ? incomingTheme : current.theme;
+    const mode = KNOWN_MODES.includes(incomingMode) ? incomingMode : current.mode;
+    return saveThemeConfig(themeConfigPath, { theme, mode });
   });
 
   ipcMain.handle('panels:get', () => loadPanelsConfig(panelsConfigPath));

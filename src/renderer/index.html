@@ -33,6 +33,8 @@
         </div>
         <div class="hero-label" style="margin-bottom:8px">Appearance - theme</div>
         <div id="swatch-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
+        <div class="hero-label" id="mode-label">Appearance - mode</div>
+        <div id="mode-seg" class="mode-seg"></div>
         <div style="height:1px;background:var(--bd);margin:14px 0"></div>
         <div class="hero-label" style="margin-bottom:2px">Budget thresholds (tokens)</div>
         <div id="budget-form"></div>
@@ -189,12 +191,20 @@
   <script src="./fleet/fleet.js"></script>
   <script>
     (async () => {
-      // Apply the stored palette before mounting so the terminal themes correctly
-      // and there is no flash. midnight stays the :root default on failure.
+      // Apply the stored palette AND mode before mounting so the terminal themes
+      // correctly and there is no flash. The static data-pal/data-mode/data-lang
+      // on <html> above (steel/dark/aether) stay put on failure.
+      // lang is derived from the palette by the main process, never stored apart
+      // from it, so a legacy palette can never load in the wrong visual language.
       try {
         const stored = await window.tokenTracker.theme.get();
-        if (stored && stored.theme) document.documentElement.dataset.palette = stored.theme;
-      } catch (e) { /* keep :root (midnight) default */ }
+        if (stored && stored.theme) {
+          const root = document.documentElement;
+          root.dataset.pal = stored.theme;
+          if (stored.mode) root.dataset.mode = stored.mode;
+          if (stored.lang) root.dataset.lang = stored.lang;
+        }
+      } catch (e) { /* keep the static steel/dark/aether default */ }
 
       try {
         const ui = await window.tokenTracker.ui.get();

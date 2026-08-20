@@ -120,7 +120,8 @@ and modify test 3 to exclude them, or (b) create separate light-tuned alarm toke
 
 ## 6. Legacy `data-palette` engine still live in `dashboard.css` alongside the new token layer
 
-**Status:** open until Task 6 (Palette and mode controls in Settings) migrates it.
+**Status:** closed. Resolved by Task 6 (Palette and mode controls in Settings) — see the
+"Resolution" section at the end of this item for what was verified and how.
 
 `src/renderer/dashboard/dashboard.css` lines 2-41 define a second, complete palette-colour
 system (`:root` default + 9 `[data-palette="..."]` blocks, ~85 hex literals) that predates
@@ -159,6 +160,49 @@ silently stop following the palette picker Task 6 builds.
 **Owner:** Task 6 ("Palette and mode controls in Settings") — its own scope already says
 "Palette grid rebuilt for 19; light/dark toggle added," which is the natural point to retire
 the old engine and picker together rather than leaving two unsynced systems live.
+
+**Additional downstream consumer found in Task 5:** `src/main/ipcHandlers.js`'s `theme:set`
+handler calls `saveThemeConfig(path, { theme })` with no `mode` key. Before Task 5,
+`saveThemeConfig` silently discarded every key except `theme` (Trap 1), so this was
+harmless. Task 5 fixed `saveThemeConfig` to actually persist `mode` — which means every
+palette change made through the current settings UI now resets the saved `mode` back to
+the default (`'dark'`), since the handler never passes the current mode through. Not
+covered by any existing test (no test exercises the IPC handler end-to-end). Task 6 must
+update `theme:set` to read and forward the current `mode` alongside `theme` when it wires
+the light/dark toggle, or a working toggle will appear to revert to dark every time the
+user also changes palette.
+
+**Resolution (Task 6):** all three parts closed together, because they are one migration.
+
+- `dashboard.css`'s legacy `:root` default and nine `[data-palette="..."]` blocks are deleted;
+  a comment in their place records why. `test/paletteEscapes.test.js` dropped its
+  `LEGACY_PALETTE_BLOCK` exclusion (now dead code) and scans `dashboard.css` whole, plus a new
+  test asserts no `[data-palette]` rule ever comes back.
+- `settingsPanel.js`'s `selectPalette()` now writes `data-pal`, `data-mode` and `data-lang`
+  (lang derived from the palette, mirroring `deriveLang()`), never `data-palette`. A new
+  `selectMode()` drives the light/dark segmented control. Each preserves the axis the user did
+  not touch. `index.html`'s boot script applies the stored `theme`/`mode`/`lang` to the same
+  three attributes instead of `data-palette`.
+- `terminal.js`'s `applyTerminalTheme()` reads `--bg-term`/`--tx-primary`/`--acc`, matching the
+  constructor's initial-theme read from Task 4.
+- `ipcHandlers.js`'s `theme:set` validates and forwards `mode` alongside `theme`, falling back
+  to the persisted value for whichever key the payload omits.
+
+**Verified live** (Electron + CDP, not by reading code): the ten old names resolve with zero
+unresolved entries under midnight/dark, violet/dark, violet/light, nord/light, steel/light,
+solarized/light, emerald/light and catppuccin/light — probed by assigning `var(--name)` to a
+detached-style probe and checking the declaration did not fall back to its initial value. The
+renderer uses exactly eleven distinct custom properties across `dashboard/`, `fleet/`,
+`terminal/` and `index.html` (the ten aliases plus `--danger`, a native tokens.css token), so
+name-level resolution covers all 309 `var()` call sites. Body background, panel gradients,
+panel borders, label text, accent fills and the xterm theme were each confirmed to repaint per
+palette and per mode. Violet + light survived a full process kill and relaunch with the light
+appearance intact, not just the persisted value.
+
+**Known limitation, by design:** the nine legacy palettes are declared in `tokens.css` without
+a `[data-mode]` qualifier, so they render identically in both modes. The mode control is
+therefore disabled (with a `title` explaining why) while a legacy palette is active; the stored
+mode is preserved untouched and re-applies as soon as an Aether palette is selected.
 
 ---
 
