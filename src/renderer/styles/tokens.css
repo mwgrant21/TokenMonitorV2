@@ -1,13 +1,17 @@
 /* src/renderer/styles/tokens.css
-   Copied from docs/prototype/index.html with ONE intentional deviation:
-   alarm colours (--success, --warn, --danger) are NOT copied from the prototype's
-   light-mode palette blocks (lines 118/132/146/160/174). These lines are deliberately
-   excluded because alarms must remain identical across every palette per test/tokens.test.js
-   test 3 ("alarm colours are identical across every palette"). Light mode inherits the
-   shared dark-tuned alarm set from :root instead. This exclusion is permanent, not an
-   oversight; re-running a literal verbatim extraction over those line ranges would
-   reintroduce them and break the test. See docs/follow-ups.md for the light-mode
-   alarm-contrast tracking issue this creates. */
+   Copied from docs/prototype/index.html, alarm colours included.
+
+   Alarm colours (--success, --warn, --danger) come in exactly two sets, one per mode:
+     - dark   : the :root set (#3be0a0 / #f5c66b / #ff6b7a), inherited unchanged by all
+                five Aether dark palettes and by every legacy [data-lang="flat"] palette.
+     - light  : #0f7f55 / #96660f / #b3283a, copied verbatim from the prototype's five
+                light-mode blocks (prototype lines 118/132/146/160/174) and repeated
+                identically in each Aether light palette below.
+   The rule an alert must mean the same thing on every desk still holds -- it is now scoped
+   per mode, because the dark-tuned pastels measured as low as 1.41:1 on a light background
+   (.alert-row.critical). Enforced by test/tokens.test.js ("alarm colours are identical across
+   every palette in the same mode"). Do NOT re-derive the light triple by hand; copy it from
+   the prototype. Closed docs/follow-ups.md item 5; the residue is tracked as item 8. */
 
 :root{
   --f-ui:'Rajdhani', Bahnschrift, 'Segoe UI Variable Display', 'Segoe UI', system-ui, sans-serif;
@@ -101,8 +105,9 @@ html[data-pal="cyan"][data-mode="light"]{
   --tx-muted:#5c828c; --tx-dim:#6f939c;
   --acc:#0a90a8; --acc-deep:#0c7f95; --acc-ink:#ffffff;
   --acc-glow:rgba(10,144,168,.3); --acc-wash:rgba(10,144,168,.1);
-  /* NOTE: --success, --warn, --danger omitted intentionally. Alarm colours must be
-     identical across every palette; light mode inherits the shared :root set. */
+  /* Light-mode alarm triple, verbatim from docs/prototype/index.html. Identical in all
+     five Aether light palettes; dark mode keeps the shared :root set. */
+  --success:#0f7f55; --warn:#96660f; --danger:#b3283a;
 }
 html[data-pal="azure"][data-mode="light"]{
   --bg-base:#eef1fa;
@@ -116,8 +121,9 @@ html[data-pal="azure"][data-mode="light"]{
   --tx-muted:#6b7597; --tx-dim:#7c86a6;
   --acc:#3a5bd0; --acc-deep:#2b46ab; --acc-ink:#ffffff;
   --acc-glow:rgba(58,91,208,.3); --acc-wash:rgba(58,91,208,.1);
-  /* NOTE: --success, --warn, --danger omitted intentionally. Alarm colours must be
-     identical across every palette; light mode inherits the shared :root set. */
+  /* Light-mode alarm triple, verbatim from docs/prototype/index.html. Identical in all
+     five Aether light palettes; dark mode keeps the shared :root set. */
+  --success:#0f7f55; --warn:#96660f; --danger:#b3283a;
 }
 html[data-pal="violet"][data-mode="light"]{
   --bg-base:#f3eefa;
@@ -131,8 +137,9 @@ html[data-pal="violet"][data-mode="light"]{
   --tx-muted:#806a99; --tx-dim:#8f7ba6;
   --acc:#7a3fc9; --acc-deep:#602ea6; --acc-ink:#ffffff;
   --acc-glow:rgba(122,63,201,.3); --acc-wash:rgba(122,63,201,.1);
-  /* NOTE: --success, --warn, --danger omitted intentionally. Alarm colours must be
-     identical across every palette; light mode inherits the shared :root set. */
+  /* Light-mode alarm triple, verbatim from docs/prototype/index.html. Identical in all
+     five Aether light palettes; dark mode keeps the shared :root set. */
+  --success:#0f7f55; --warn:#96660f; --danger:#b3283a;
 }
 html[data-pal="emerald"][data-mode="light"]{
   --bg-base:#e9f8f1;
@@ -146,8 +153,9 @@ html[data-pal="emerald"][data-mode="light"]{
   --tx-muted:#5c8a78; --tx-dim:#6f9a88;
   --acc:#0d8f63; --acc-deep:#0a7350; --acc-ink:#ffffff;
   --acc-glow:rgba(13,143,99,.3); --acc-wash:rgba(13,143,99,.1);
-  /* NOTE: --success, --warn, --danger omitted intentionally. Alarm colours must be
-     identical across every palette; light mode inherits the shared :root set. */
+  /* Light-mode alarm triple, verbatim from docs/prototype/index.html. Identical in all
+     five Aether light palettes; dark mode keeps the shared :root set. */
+  --success:#0f7f55; --warn:#96660f; --danger:#b3283a;
 }
 html[data-pal="steel"][data-mode="light"]{
   --bg-base:#eff1f2;
@@ -161,8 +169,9 @@ html[data-pal="steel"][data-mode="light"]{
   --tx-muted:#6d777c; --tx-dim:#7d878c;
   --acc:#41525a; --acc-deep:#2c3a41; --acc-ink:#ffffff;
   --acc-glow:rgba(65,82,90,.26); --acc-wash:rgba(65,82,90,.09);
-  /* NOTE: --success, --warn, --danger omitted intentionally. Alarm colours must be
-     identical across every palette; light mode inherits the shared :root set. */
+  /* Light-mode alarm triple, verbatim from docs/prototype/index.html. Identical in all
+     five Aether light palettes; dark mode keeps the shared :root set. */
+  --success:#0f7f55; --warn:#96660f; --danger:#b3283a;
 }
 html[data-lang="flat"]{
   --f-ui:system-ui, -apple-system, sans-serif;

@@ -78,12 +78,55 @@ test('every legacy palette defines the thirteen flat-language tokens', () => {
   assert.deepStrictEqual(problems, []);
 });
 
-test('alarm colours are identical across every palette', () => {
-  // An alert must mean the same thing on every desk. Only the accent changes.
-  const offenders = AETHER.flatMap((pal) => ['dark', 'light'].map((mode) => {
-    const body = blockFor(`html[data-pal="${pal}"][data-mode="${mode}"]`);
-    return ['success', 'warn', 'danger'].some((t) => body.includes(`--${t}:`))
-      ? `${pal}/${mode} overrides an alarm colour` : null;
-  })).filter(Boolean);
-  assert.deepStrictEqual(offenders, []);
+const ALARMS = ['success', 'warn', 'danger'];
+
+// The declared value of --<token> inside a CSS block body, or null if absent.
+function declared(body, token) {
+  const m = body.match(new RegExp(`--${token}\\s*:\\s*([^;}]+)`));
+  return m ? m[1].trim() : null;
+}
+
+// What a palette block actually resolves an alarm token to: its own declaration
+// if it overrides, otherwise the shared :root value it inherits.
+function resolvedAlarms(body) {
+  const root = blockFor(':root{');
+  return ALARMS.map((t) => declared(body, t) ?? declared(root, t));
+}
+
+test('alarm colours are identical across every palette in the same mode', () => {
+  // An alert must mean the same thing on every desk running the same mode. Only the
+  // accent changes between palettes. The two modes legitimately differ from each other:
+  // the dark set is tuned for dark backgrounds and is illegible on light ones.
+  const perMode = {};
+  for (const mode of ['dark', 'light']) {
+    const seen = AETHER.map((pal) => ({
+      pal,
+      alarms: resolvedAlarms(blockFor(`html[data-pal="${pal}"][data-mode="${mode}"]`)),
+    }));
+    const first = seen[0].alarms;
+    for (const { pal, alarms } of seen) {
+      assert.deepStrictEqual(alarms, first,
+        `${pal}/${mode} disagrees with ${seen[0].pal}/${mode} on the alarm colours`);
+    }
+    assert.ok(first.every(Boolean), `${mode} leaves an alarm colour undefined`);
+    perMode[mode] = first;
+  }
+
+  // Dark mode must still inherit :root untouched -- no per-palette dark override at
+  // all, not even one that happens to restate the same values. A redundant copy is a
+  // second place to edit, which is how the palettes drift apart in the first place.
+  const darkOverrides = AETHER.filter((pal) => {
+    const body = blockFor(`html[data-pal="${pal}"][data-mode="dark"]`);
+    return ALARMS.some((t) => declared(body, t) !== null);
+  });
+  assert.deepStrictEqual(darkOverrides, [],
+    'dark mode should inherit the shared :root alarm set, not redeclare it');
+
+  const root = blockFor(':root{');
+  assert.deepStrictEqual(perMode.dark, ALARMS.map((t) => declared(root, t)),
+    'dark mode should resolve to the shared :root alarm set');
+
+  // Light mode carries its own light-tuned triple, verbatim from the prototype.
+  assert.deepStrictEqual(perMode.light, ['#0f7f55', '#96660f', '#b3283a']);
+  assert.notDeepStrictEqual(perMode.light, perMode.dark);
 });

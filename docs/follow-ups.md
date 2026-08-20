@@ -92,7 +92,8 @@ survive contact with the code it describes.
 
 ## 5. Light mode inherits dark-tuned alarm colours — contrast risk
 
-**Status:** open until light-mode alarm UI is rendered and visually verified.
+**Status:** closed. Resolved by the final-review fix wave — see the "Resolution" section at
+the end of this item for the measured before/after contrast and the one residual it leaves.
 
 `src/renderer/styles/tokens.css` defines alarm colours (--success, --warn, --danger)
 once in `:root` with dark-mode-optimized pastel values (#3be0a0 green, #f5c66b yellow,
@@ -115,6 +116,54 @@ and modify test 3 to exclude them, or (b) create separate light-tuned alarm toke
 
 **Owner:** Whichever task first wires alert/warning/danger styling into visible UI
 (likely Phase 3 or later, when panel content renders).
+
+**What made it reachable:** Task 6 shipped the light/dark toggle and Task 7 added the
+alarm-coloured `.footer-alarm` element, so the trigger condition above fired mid-branch. The
+whole-branch review then measured `.alert-row.critical` at **1.41:1** in steel/light — the
+app's highest-priority alert UI was unreadable.
+
+**Resolution (final-review fix wave):** took option (a). All five
+`html[data-pal="X"][data-mode="light"]` blocks in `tokens.css` now declare
+`--success:#0f7f55; --warn:#96660f; --danger:#b3283a;`, copied verbatim from
+`docs/prototype/index.html` lines 118/132/146/160/174 (re-checked against the prototype, not
+transcribed from memory). Dark mode and the nine legacy `[data-lang="flat"]` palettes are
+untouched and still inherit the `:root` set.
+
+`test/tokens.test.js` test 3 was rewritten rather than deleted: it now asserts the five Aether
+palettes agree with each other *within* each mode, that no dark block redeclares an alarm token
+at all (even redundantly), and that the light triple matches the prototype and differs from the
+dark one. Its "an alert must mean the same thing on every desk" invariant is preserved, scoped
+per mode. Mutation-tested three ways (diverge one light palette; add a redundant dark override;
+revert the light triple to the pastels) — all three fail the test.
+
+**Verified live** (real Electron renderer + real IPC backend against scratch config paths, not
+by reading code): the driver probes inject the real alarm classes into the live document and
+read `getComputedStyle`, then compute WCAG ratios against the composited backdrop. Run once
+with the pre-fix state restored and once after. steel/light:
+
+| element | before | after | floor |
+|---|---|---|---|
+| `.alert-row.critical` text on `--warn` fill | 1.41 | 4.41 | 4.5 |
+| `.optimize-grade` text on `--warn` fill | 1.41 | 4.41 | 4.5 |
+| `.forecast-status.over` `--warn` text on panel | 1.41 | 4.48–4.95 | 4.5 |
+| `.footer-alarm.warn` text on chrome | 1.54 | 4.84 | 4.5 |
+| `.footer-alarm.crit` text on chrome | 2.66 | 6.20 | 4.5 |
+| `.budget-fill.warn` vs `.budget-track` | 1.56 | 4.87 | 3 |
+| `.mini-alert` `--warn` left bar vs panel2 | 1.56 | 4.87 | 3 |
+| `.mini-alert.critical` `--danger` left bar | 2.68 | 6.24 | 3 |
+| `.cli-toast-icon` `--warn` on panel2 | 1.56 | 4.87 | 3 |
+| `.alert-row.warning` `--warn` left bar vs panel | 1.41 | 4.41 | 3 |
+
+cyan/light and emerald/light were probed the same way and every element passes its floor
+(4.54–6.27 after, 1.45–2.70 before). steel/dark, nord/dark and midnight/dark were probed before
+and after and are byte-identical — the dark and legacy sets did not move.
+
+**Residual, deliberately not fixed here (new follow-up, item 8):** `.alert-row.critical` and
+`.optimize-grade` paint text in `var(--bg)` on a `var(--warn)` fill. With the prototype's
+`--warn`, that pairing lands at 4.54 (cyan), 4.56 (emerald), 4.42 (azure), 4.41 (steel), 4.38
+(violet) — three palettes sit just under the 4.5 floor. This is a 3.1x improvement on the 1.41
+that opened this item, and it is the prototype's own value, so it was shipped as-is rather than
+inventing a darker yellow. Closing the last 0.1 needs a design decision, not a transcription.
 
 ---
 
@@ -247,6 +296,57 @@ html[data-lang="flat"] .optimize-card{ box-shadow:none !important; }
 
 **Owner:** unassigned — not in scope for any of the 8 tasks in `docs/plans/2026-08-05-reskin-
 phases-3-4.md`. Small, one-line fix; pick up opportunistically or as its own quick task.
+
+---
+
+## 8. Text-on-`--warn`-fill sits ~0.1 under WCAG AA in three light palettes
+
+**Status:** open. Needs a design decision, which is why item 5 did not absorb it.
+
+Two rules paint text in `var(--bg)` on a `var(--warn)` fill:
+
+- `dashboard.css:335` — `.alert-row.critical { background: var(--warn); color: var(--bg); }`
+  (its `.alert-title` is `700 12.5px`, so the 4.5 normal-text floor applies, not 3)
+- `dashboard.css:194` — `.optimize-grade { color: var(--bg); background: var(--warn); }`
+
+With the light-mode `--warn` (`#96660f`) that item 5 introduced, that pairing measures:
+
+| palette | `--bg-base` | ratio | floor 4.5 |
+|---|---|---|---|
+| emerald | `#e9f8f1` | 4.56 | pass |
+| cyan | `#eaf6fb` | 4.54 | pass |
+| azure | `#eef1fa` | 4.42 | short |
+| steel | `#eff1f2` | 4.41 | short |
+| violet | `#f3eefa` | 4.38 | short |
+
+steel is the app's default palette, so the default light appearance is one of the short ones.
+
+**Why it was not fixed in the same pass:** `#96660f` is copied verbatim from
+`docs/prototype/index.html`, which the plan names as "the source of truth for every value", and
+the prototype has no `.alert-row.critical` rule at all — it never puts text on an alarm fill
+(`.alert-title` there is `color: var(--tx-primary)` on a normal panel). So there is no verbatim
+prototype answer to copy, and every available fix is a new design decision.
+
+**Candidate fixes, none of them free:**
+
+1. Repoint both rules' ink at `var(--acc-ink)`, which is already `#ffffff` in all five Aether
+   light palettes. Pure white on `#96660f` clears 4.5 everywhere. But `--acc-ink` is a dark
+   colour in dark mode, so this changes dark rendering too and needs its own verification.
+2. Darken the light `--warn` past the prototype's value. Clears the floor but breaks the
+   "copy the prototype verbatim" constraint and desynchronises tokens.css from the prototype.
+3. Accept 4.38–4.56 as close enough. Defensible — it is a 3.1x improvement over the 1.41 that
+   item 5 opened with, and all other alarm UI passes comfortably — but it should be an explicit
+   decision rather than a silent one.
+
+**Related, pre-existing, and untouched by item 5:** in nord/dark, `.footer-alarm.crit`
+(`--danger` `#ff6b7a` on that palette's chrome) measures 4.03 against the same 4.5 floor. That
+is the shared dark alarm set on a legacy palette, unrelated to the light-mode change.
+`test/contrast.test.js` does not catch either case: it covers only the nine legacy palettes and
+only the `tx-*` tokens, never the alarm triple and never the five Aether palettes. Extending it
+to alarm colours x 5 Aether palettes x 2 modes would have caught both, and is worth doing
+alongside whichever fix is chosen.
+
+**Owner:** unassigned.
 
 ---
 
