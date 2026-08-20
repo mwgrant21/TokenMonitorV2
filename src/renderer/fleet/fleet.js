@@ -150,6 +150,7 @@ async function refreshFleetView() {
     if (state && state.error) return;
     lastRefreshedAt = Date.now();
     updateSeatsChip(state);
+    if (window.TT && window.TT.footer) window.TT.footer.renderFleet(state);
     if (!state.connected) {
       renderEmptyState();
     } else {

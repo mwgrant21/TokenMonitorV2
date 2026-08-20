@@ -11,7 +11,7 @@
 </head>
 <body style="margin:0;display:flex;flex-direction:column;width:100vw;height:100vh">
   <div id="mini-root"></div>
-  <header style="display:flex;justify-content:flex-end;align-items:center;gap:6px;padding:8px 16px">
+  <header class="titlebar" style="justify-content:flex-end">
     <div id="period-seg" style="display:flex;gap:2px;background:var(--panel);border:1px solid var(--bd);border-radius:6px;padding:2px;margin-right:6px">
       <button type="button" class="period-btn" id="period-today" data-period="today">Today</button>
       <button type="button" class="period-btn active" id="period-7d" data-period="7d">7 Days</button>
@@ -69,6 +69,9 @@
         </div>
         <div style="height:1px;background:var(--bd);margin:14px 0"></div>
         <button id="settings-replay-btn" type="button" style="background:transparent;border:1px solid var(--bd);color:var(--dim);border-radius:6px;padding:6px 10px;cursor:pointer;width:100%">&#8635; Replay setup</button>
+        <div style="height:1px;background:var(--bd);margin:14px 0"></div>
+        <div class="hero-label" style="margin-bottom:6px">About</div>
+        <div style="font:500 10.5px 'JetBrains Mono',monospace;color:var(--dim)">Token Tracker v<span id="settings-version">&hellip;</span></div>
       </div>
     </div>
     <span id="seats-chip" class="seats-chip" style="display:none"></span>
@@ -92,6 +95,14 @@
   </div>
   <div id="fleet-pane" style="display:none;flex:1;overflow:auto"></div>
   </div>
+
+  <footer class="footer" id="app-footer">
+    <span id="footer-version">v&hellip;</span>
+    <span class="footer-path" id="footer-fleet-path">fleet: not connected</span>
+    <span id="footer-seats"></span>
+    <span class="footer-spacer"></span>
+    <span class="footer-alarm" id="footer-alarm">NOMINAL</span>
+  </footer>
 
   <!-- Apply-fix confirm dialog -->
   <div id="optimize-apply-backdrop" style="display:none"></div>
@@ -178,6 +189,7 @@
   <script src="./dashboard/panels/activity.js"></script>
   <script src="./dashboard/panels/alerts.js"></script>
   <script src="./dashboard/panels/optimize.js"></script>
+  <script src="./dashboard/panels/footer.js"></script>
   <script src="./dashboard/panels/settingsPanel.js"></script>
   <script src="./dashboard/panels/insights.js"></script>
   <script src="./dashboard/panels/exportModal.js"></script>

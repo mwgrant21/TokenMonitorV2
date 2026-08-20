@@ -234,6 +234,17 @@ function mountAlertsSection() {
   });
 }
 
+// Fetched once at mount -- the running version never changes within a session.
+async function renderSettingsVersion() {
+  const el = document.getElementById('settings-version');
+  if (!el || !window.tokenTracker || !window.tokenTracker.app) return;
+  try {
+    el.textContent = await window.tokenTracker.app.getVersion();
+  } catch (e) {
+    /* leave the placeholder */
+  }
+}
+
 async function openSettings() {
   await populateBudgetForm();
   await refreshAlertsSection();
@@ -327,4 +338,5 @@ function mountSettings() {
   })();
 
   mountAlertsSection();
+  renderSettingsVersion();
 }

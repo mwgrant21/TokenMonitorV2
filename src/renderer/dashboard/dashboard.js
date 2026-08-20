@@ -10,6 +10,7 @@ function mountDashboard() {
     window.TT.optimize.render(state);
     window.TT.alertsPanel.render(state);
     window.TT.mini.render(state);
+    window.TT.footer.render(state);
   };
   window.TT = window.TT || {};
   window.TT.renderDashboard = render;
@@ -17,6 +18,7 @@ function mountDashboard() {
   window.TT.alertsPanel.mount();
   window.TT.insights.mount();
   window.TT.exportModal.mount();
+  window.TT.footer.mount();
   window.tokenTracker.dashboard.getState().then(render);
   window.tokenTracker.dashboard.onUpdate(render);
 }

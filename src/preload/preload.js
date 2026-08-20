@@ -2,6 +2,9 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('tokenTracker', {
+  app: {
+    getVersion: () => ipcRenderer.invoke('app:version'),
+  },
   pty: {
     start: (opts) => ipcRenderer.invoke('pty:start', opts),
     write: (input) => ipcRenderer.send('pty:write', input),

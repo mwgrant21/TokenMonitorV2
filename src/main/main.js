@@ -1,5 +1,5 @@
 // src/main/main.js
-const { app, BrowserWindow, ipcMain, dialog, Notification } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Notification, Menu } = require('electron');
 const path = require('node:path');
 const os = require('node:os');
 const { spawnPty } = require('./ptyManager');
@@ -81,6 +81,10 @@ app.whenReady().then(async () => {
     getLatestCwd,
     optimizeStatePath: path.join(os.homedir(), '.claude-token-tracker', 'optimize-state.json'),
   });
+
+  // The in-app titlebar (index.html's <header>) replaces the native menu bar's
+  // role, so drop Electron's default application menu.
+  Menu.setApplicationMenu(null);
 
   const win = createWindow();
 
@@ -207,6 +211,10 @@ ipcMain.on('pty:write', (event, input) => {
 ipcMain.on('pty:resize', (event, { cols, rows }) => {
   if (activePty) activePty.resize(cols, rows);
 });
+
+// Running app version for the footer's version chip / settings About row.
+// Reads package.json via Electron's own app.getVersion() -- no new file needed.
+ipcMain.handle('app:version', () => app.getVersion());
 
 let fleetFolderPath = null;
 
