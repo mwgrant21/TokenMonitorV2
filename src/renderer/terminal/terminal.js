@@ -7,10 +7,17 @@
 // (node_modules/xterm/lib/xterm.js), which attaches `Terminal` to the global
 // scope. Behavior and structure otherwise match the plan.
 function mountTerminal(containerEl) {
+  // Read the initial theme from tokens.css's computed custom properties instead of
+  // hardcoding literals, so the very first paint already matches the active palette
+  // (data-pal/data-mode on <html>) rather than always starting dark. Same read
+  // pattern as applyTerminalTheme() below.
+  const initialCs = getComputedStyle(document.documentElement);
+  const initialBackground = initialCs.getPropertyValue('--bg-term').trim();
+  const initialForeground = initialCs.getPropertyValue('--tx-primary').trim();
   const term = new Terminal({
     fontFamily: "'JetBrains Mono', monospace",
     fontSize: 12.5,
-    theme: { background: '#0b0e14', foreground: '#e7ebf3' },
+    theme: { background: initialBackground, foreground: initialForeground },
   });
   const fit = new FitAddon.FitAddon(); // UMD global from xterm-addon-fit script tag
   term.loadAddon(fit);

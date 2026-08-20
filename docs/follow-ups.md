@@ -118,6 +118,50 @@ and modify test 3 to exclude them, or (b) create separate light-tuned alarm toke
 
 ---
 
+## 6. Legacy `data-palette` engine still live in `dashboard.css` alongside the new token layer
+
+**Status:** open until Task 6 (Palette and mode controls in Settings) migrates it.
+
+`src/renderer/dashboard/dashboard.css` lines 2-41 define a second, complete palette-colour
+system (`:root` default + 9 `[data-palette="..."]` blocks, ~85 hex literals) that predates
+Tasks 1-3's `tokens.css` layer. It is not dead code: `settingsPanel.js:42` sets
+`document.documentElement.dataset.palette = slug` and is the only currently-wired theme
+picker the user can actually operate. The new `data-pal`/`data-mode`/`data-lang` attributes
+(consumed by `tokens.css`) are only ever set once, statically, in `index.html` — nothing
+drives them dynamically yet. Because `dashboard.css` loads after `tokens.css` and both
+declare `:root { --bg: ...; }` etc., the legacy block currently wins the cascade for any
+rule still written in terms of the old variable names (`--bg`, `--panel`, `--tx`, ...).
+
+**Evidence:** Task 4 implementer's guard test (`test/paletteEscapes.test.js`, "no hardcoded
+hex colours outside tokens.css") flags all ~85 literals when run unscoped against
+`dashboard.css`; full listing in task-4-report.md
+(.superpowers/sdd/2026-08-05-reskin-phases-3-4/).
+
+**Fix:** Delete `dashboard.css`'s `:root`/`[data-palette]` block, confirm every rule that
+read `--bg`/`--panel`/`--panel2`/`--bd`/`--tx`/`--dim`/`--acc`/`--acc2`/`--warn`/`--soft`
+still resolves through `tokens.css`'s compatibility aliases, and rewire `settingsPanel.js`
+(and any downstream consumer, e.g. `dashboard.js`'s `KNOWN_PALETTES`) to set
+`data-pal`/`data-mode` instead of `data-palette`.
+
+**Additional downstream consumer found in Task 4:** `src/renderer/terminal/terminal.js`'s
+`applyTerminalTheme()` (called once at mount, and again by `settingsPanel.js:45` on every
+`data-palette` change) reads `--bg`/`--tx`/`--acc` — the legacy names — and is called
+synchronously right after the terminal mounts. Task 4 fixed the xterm constructor's
+*initial* theme to read `--bg-term`/`--tx-primary` (the new token names), but confirmed live
+via CDP that `applyTerminalTheme()`'s subsequent call immediately overwrites it back to the
+legacy-engine value in both a dark and a light `data-pal`/`data-mode` state (terminal stayed
+at `#0b0e14`/`#e7ebf3` in both). So today the terminal's *rendered* colour still tracks only
+the legacy `data-palette` system, not `data-pal`/`data-mode`, even though the escape (the
+hardcoded hex literal) is closed. When this item's migration rewires the legacy engine,
+`applyTerminalTheme()` must also switch to `--bg-term`/`--tx-primary` or the terminal will
+silently stop following the palette picker Task 6 builds.
+
+**Owner:** Task 6 ("Palette and mode controls in Settings") — its own scope already says
+"Palette grid rebuilt for 19; light/dark toggle added," which is the natural point to retire
+the old engine and picker together rather than leaving two unsynced systems live.
+
+---
+
 ## Not a code issue: rotate the deployed update token
 
 **Owner: Matt. Not actionable in this repo.**
