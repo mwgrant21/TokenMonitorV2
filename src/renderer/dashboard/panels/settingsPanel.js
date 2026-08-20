@@ -100,7 +100,7 @@ function swatchButtonHtml(p, active, colors) {
         <span style="width:34px;height:34px;border-radius:9px;background:${escapeHtml(c.bg || 'transparent')};border:2px solid ${border};display:flex;align-items:center;justify-content:center">
           <span style="width:12px;height:12px;border-radius:50%;background:${escapeHtml(c.acc || 'transparent')}"></span>
         </span>
-        <span style="font:500 9px 'JetBrains Mono',monospace;color:var(--dim);white-space:nowrap">${escapeHtml(p.label)}</span>
+        <span style="font:500 9px var(--f-mono);color:var(--dim);white-space:nowrap">${escapeHtml(p.label)}</span>
       </button>`;
 }
 
@@ -175,7 +175,7 @@ async function populateBudgetForm() {
     .map(
       (period) => `
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-        <label for="budget-${period}" style="font:500 11px 'JetBrains Mono',monospace">${period[0].toUpperCase()}${period.slice(1)}</label>
+        <label for="budget-${period}" style="font:500 11px var(--f-mono)">${period[0].toUpperCase()}${period.slice(1)}</label>
         <input id="budget-${period}" type="number" value="${budgets[period].tokens}" min="1" style="width:140px">
       </div>`
     )

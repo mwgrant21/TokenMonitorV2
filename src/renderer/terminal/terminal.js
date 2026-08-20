@@ -14,8 +14,12 @@ function mountTerminal(containerEl) {
   const initialCs = getComputedStyle(document.documentElement);
   const initialBackground = initialCs.getPropertyValue('--bg-term').trim();
   const initialForeground = initialCs.getPropertyValue('--tx-primary').trim();
+  // xterm takes a plain font-family string, not a CSS var(), so read the resolved
+  // --f-mono the same way. Aether palettes give Space Mono, flat/legacy ones give
+  // JetBrains Mono; the literal below is only the CSS-not-ready fallback.
+  const initialFont = initialCs.getPropertyValue('--f-mono').trim();
   const term = new Terminal({
-    fontFamily: "'JetBrains Mono', monospace",
+    fontFamily: initialFont || "'JetBrains Mono', monospace",
     fontSize: 12.5,
     theme: { background: initialBackground, foreground: initialForeground },
   });
@@ -91,6 +95,15 @@ function applyTerminalTheme(term) {
   const background = cs.getPropertyValue('--bg-term').trim();
   const foreground = cs.getPropertyValue('--tx-primary').trim();
   const cursor = cs.getPropertyValue('--acc').trim();
+  const fontFamily = cs.getPropertyValue('--f-mono').trim();
   if (!background) return; // CSS not ready; keep constructor defaults
   term.options.theme = { background, foreground, cursor };
+  // Aether <-> legacy palette switches also swap --f-mono, so follow it here or the
+  // terminal keeps the previous palette's typeface until the app restarts. A new family
+  // means new cell metrics, so refit -- otherwise the grid keeps the old font's rows/cols
+  // and the pty's size drifts out of lockstep with what is drawn.
+  if (fontFamily && term.options.fontFamily !== fontFamily) {
+    term.options.fontFamily = fontFamily;
+    if (typeof window.__ttFit === 'function') window.__ttFit();
+  }
 }
