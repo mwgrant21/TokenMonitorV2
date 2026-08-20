@@ -306,7 +306,9 @@ phases-3-4.md`. Small, one-line fix; pick up opportunistically or as its own qui
 Two rules paint text in `var(--bg)` on a `var(--warn)` fill:
 
 - `dashboard.css:335` — `.alert-row.critical { background: var(--warn); color: var(--bg); }`
-  (its `.alert-title` is `700 12.5px`, so the 4.5 normal-text floor applies, not 3)
+  (its `.alert-title` is `700 12.5px`, so the 4.5 normal-text floor applies, not 3). Its sibling
+  `.alert-detail` (`:341`) inherits the same `color: var(--bg)` and applies `opacity: .8` on top,
+  so its *effective* ratio is below every figure in the table below — same rule, same fix.
 - `dashboard.css:194` — `.optimize-grade { color: var(--bg); background: var(--warn); }`
 
 With the light-mode `--warn` (`#96660f`) that item 5 introduced, that pairing measures:
@@ -323,15 +325,23 @@ steel is the app's default palette, so the default light appearance is one of th
 
 **Why it was not fixed in the same pass:** `#96660f` is copied verbatim from
 `docs/prototype/index.html`, which the plan names as "the source of truth for every value", and
-the prototype has no `.alert-row.critical` rule at all — it never puts text on an alarm fill
-(`.alert-title` there is `color: var(--tx-primary)` on a normal panel). So there is no verbatim
-prototype answer to copy, and every available fix is a new design decision.
+the prototype has no `.alert-row.critical` rule — it never puts text on an alarm fill there
+(`.alert-title` is `color: var(--tx-primary)` on a normal panel). **Correction, caught by the
+final-review re-review:** the prototype *does* have a counterpart for the second rule —
+`.grade` (`docs/prototype/index.html:459`, rendered as `<button class="grade">SETUP C ▾</button>`
+at `:755`) is `.optimize-grade`'s direct source. It is `color:#1a1204; background:var(--warn)`,
+a fixed ink rather than `var(--bg)` — and it measures **worse**, not better: `#1a1204` on
+`#96660f` is **3.71:1**, below even the app's current 4.41. So a verbatim prototype answer does
+exist for `.optimize-grade`, but adopting it would regress this fix, not complete it. Do not pull
+`#1a1204` from the prototype as "the correct fix" without re-deriving the ratio yourself — that
+value was checked once already, on 2026-08-20, and it fails.
 
 **Candidate fixes, none of them free:**
 
 1. Repoint both rules' ink at `var(--acc-ink)`, which is already `#ffffff` in all five Aether
-   light palettes. Pure white on `#96660f` clears 4.5 everywhere. But `--acc-ink` is a dark
-   colour in dark mode, so this changes dark rendering too and needs its own verification.
+   light palettes. Pure white on `#96660f` measures 4.99 — clears 4.5 everywhere, verified. But
+   `--acc-ink` is a dark colour in dark mode, so this changes dark rendering too and needs its
+   own verification.
 2. Darken the light `--warn` past the prototype's value. Clears the floor but breaks the
    "copy the prototype verbatim" constraint and desynchronises tokens.css from the prototype.
 3. Accept 4.38–4.56 as close enough. Defensible — it is a 3.1x improvement over the 1.41 that
@@ -345,6 +355,11 @@ is the shared dark alarm set on a legacy palette, unrelated to the light-mode ch
 only the `tx-*` tokens, never the alarm triple and never the five Aether palettes. Extending it
 to alarm colours x 5 Aether palettes x 2 modes would have caught both, and is worth doing
 alongside whichever fix is chosen.
+
+**Adjacent, not part of this item:** `.alert-row.critical` painting a **critical** alert in
+`var(--warn)` rather than `var(--danger)` looks like a pre-existing semantic mismatch, independent
+of the contrast question above (found during the final-review re-review). Not investigated
+further here — flagging so it isn't mistaken for something this item already covers.
 
 **Owner:** unassigned.
 
