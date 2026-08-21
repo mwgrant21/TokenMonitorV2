@@ -8,14 +8,22 @@
 // every dashboard render fan-out.
 //
 // The version button also mirrors version:getStatus (src/main/versionStatus.js,
-// computed on the existing 60s history-rescan tick in main - not a renderer
-// poll). Two of the three states render no chip at all: silence is the reward
-// for being current, and 'unknown' must never look like an error - the share
-// being unreachable isn't the user's problem. Rollout stays manual by design,
-// so the popover only ever says to contact IT - no download, no self-service
-// install.
+// computed on the existing 60s history-rescan tick in main). The renderer
+// re-pulls it on a throttle piggybacked on the existing 1s dashboard:update
+// fan-out (render(), below) rather than opening a second timer -- main's own
+// value only changes once a minute, so anything faster would just be reading
+// the same cached object. Without this the chip only ever reflected whatever
+// was true at mount: a `latest.json` published (or removed) after the app was
+// already open would never be noticed until restart, which defeats the
+// feature in the app's normal always-open mode. Two of the three states
+// render no chip at all: silence is the reward for being current, and
+// 'unknown' must never look like an error - the share being unreachable
+// isn't the user's problem. Rollout stays manual by design, so the popover
+// only ever says to contact IT - no download, no self-service install.
 (function () {
   let versionStatus = null;
+  let lastVersionPoll = 0;
+  const VERSION_POLL_INTERVAL_MS = 60_000;
 
   function alarmFromAlerts(alerts) {
     if (!alerts || !alerts.length) return { label: 'NOMINAL', cls: '' };
@@ -49,9 +57,17 @@
   function renderVersionPopover() {
     const current = document.getElementById('footer-version-pop-current');
     const meta = document.getElementById('footer-version-pop-meta');
-    if (!current || !meta || !versionStatus) return;
-    current.textContent = `Version · v${versionStatus.current}`;
-    if (versionStatus.state === 'behind') {
+    if (!current || !meta) return;
+    // A failed versionStatus() call (or one still in flight) must not leave
+    // the popover showing two empty boxes -- fall back to the same "unknown"
+    // copy used for a genuinely unreachable share, since from the user's
+    // side the two are indistinguishable anyway.
+    const btn = document.getElementById('footer-version');
+    const knownVersion = versionStatus ? versionStatus.current : (btn && btn.textContent !== 'v…' ? btn.textContent.replace(/^v/, '') : null);
+    current.textContent = knownVersion ? `Version · v${knownVersion}` : 'Version';
+    if (!versionStatus) {
+      meta.textContent = 'Update status unknown — no fleet folder connected, or the share is unreachable.';
+    } else if (versionStatus.state === 'behind') {
       meta.textContent = `v${versionStatus.latest} is available. Contact IT to have it installed.`;
     } else if (versionStatus.state === 'current') {
       meta.textContent = 'Up to date.';
@@ -62,10 +78,10 @@
 
   function renderSettingsVersionMirror() {
     const el = document.getElementById('settings-version-status');
-    if (!el || !versionStatus) return;
-    if (versionStatus.state === 'behind') el.textContent = `v${versionStatus.latest} available, contact IT`;
-    else if (versionStatus.state === 'current') el.textContent = 'up to date';
-    else el.textContent = '';
+    if (!el) return;
+    if (!versionStatus || versionStatus.state === 'unknown') el.textContent = '';
+    else if (versionStatus.state === 'behind') el.textContent = `v${versionStatus.latest} available, contact IT`;
+    else el.textContent = 'up to date';
   }
 
   async function refreshVersionStatus() {
@@ -110,10 +126,20 @@
 
   function render(state) {
     const el = document.getElementById('footer-alarm');
-    if (!el) return;
-    const { label, cls } = alarmFromAlerts(state && state.alerts);
-    el.textContent = label;
-    el.className = `footer-alarm${cls ? ` ${cls}` : ''}`;
+    if (el) {
+      const { label, cls } = alarmFromAlerts(state && state.alerts);
+      el.textContent = label;
+      el.className = `footer-alarm${cls ? ` ${cls}` : ''}`;
+    }
+    // Piggyback the version-status re-poll on this existing 1s fan-out rather
+    // than opening a second timer. Throttled to match main's own refresh
+    // cadence -- main's cache only changes once a minute, so polling faster
+    // would just re-read the same object.
+    const now = Date.now();
+    if (now - lastVersionPoll >= VERSION_POLL_INTERVAL_MS) {
+      lastVersionPoll = now;
+      refreshVersionStatus();
+    }
   }
 
   // Called by fleet.js's refreshFleetView (same poll cycle that already
@@ -137,5 +163,5 @@
   }
 
   window.TT = window.TT || {};
-  window.TT.footer = { mount, render, renderFleet };
+  window.TT.footer = { mount, render, renderFleet, refreshVersionStatus };
 })();

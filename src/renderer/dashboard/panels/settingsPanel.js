@@ -252,6 +252,12 @@ async function openSettings() {
   renderModeControl();
   document.getElementById('settings-backdrop').style.display = 'block';
   document.getElementById('settings-popover').style.display = 'block';
+  // #settings-version-status is owned by footer.js (it already holds the
+  // versionStatus fetch/render logic for the footer's own mirror of the same
+  // data) -- ask it to refresh rather than duplicating the IPC call here.
+  if (window.TT && window.TT.footer && window.TT.footer.refreshVersionStatus) {
+    window.TT.footer.refreshVersionStatus();
+  }
 }
 
 function closeSettings() {
