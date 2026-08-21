@@ -73,10 +73,13 @@ body {
 #footer-version-pop-meta { color: var(--dim); margin-top: 6px; }
 
 .hero-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; padding: 22px 24px 0; }
-.hero-tile { background: var(--panel-grad); border: 1px solid var(--panel-bd); border-radius: var(--r-panel); padding: 15px 17px; box-shadow: 0 1px 0 var(--acc-wash) inset, 0 10px 30px rgba(0,0,0,.28); }
-.hero-label { font: 700 9.5px var(--f-mono); letter-spacing: .6px; color: var(--dim); text-transform: uppercase; }
-.hero-value { font: 700 27px/1.1 var(--f-mono); margin-top: 7px; }
-.hero-sub { font: 500 10.5px var(--f-mono); color: var(--dim); margin-top: 2px; }
+.hero-tile { background: var(--panel-grad); border: 1px solid var(--panel-bd); border-radius: var(--r-panel); box-shadow: 0 1px 0 var(--acc-wash) inset, 0 10px 30px rgba(0, 0, 0, .28); padding: 15px 17px; position: relative; overflow: hidden; }
+.hero-tile::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: linear-gradient(180deg, transparent, var(--acc), transparent); opacity: .5; }
+.hero-label { font: 600 9px/1 var(--f-ui); letter-spacing: 2px; color: var(--tx-muted); text-transform: uppercase; }
+.hero-value { font: 700 27px/1.1 var(--f-mono); color: var(--tx-primary); letter-spacing: -.5px; }
+.hero-value.accent { color: var(--acc); }
+.hero-sub { font: 400 9.5px/1 var(--f-mono); color: var(--tx-dim); margin-top: 7px; }
+.hero-sub.good { color: var(--success); }
 
 /* ---- hero week-over-week delta badges ---- */
 .hero-tile-top { display: flex; align-items: center; gap: 8px; }
