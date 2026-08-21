@@ -282,8 +282,13 @@ body {
 .treemap-row { display: flex; gap: 4px; margin-top: 12px; height: 64px; }
 .treemap-block { display: flex; flex-direction: column; justify-content: flex-end; min-width: 8px; border-radius: 8px; padding: 8px 10px; overflow: hidden; transition: transform .18s; }
 .treemap-block:hover { transform: translateY(-2px); }
-.treemap-cat { font: 700 10px/1 var(--f-ui); letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.treemap-pct { font: 400 9px/1 var(--f-mono); opacity: .75; margin-top: 3px; }
+/* Ink is var(--bg) because every treemap block paints an *accent-family* background inline
+   (activity.js's `colors` array), never the page background. The prototype picks each block's
+   ink from that block's own luminance in JS; we do not port that mechanism here - see
+   docs/follow-ups.md item 10. Without this declaration the labels inherit body's var(--tx)
+   and the dominant --acc block measures 1.18:1 on steel/dark. */
+.treemap-cat { font: 700 10px/1 var(--f-ui); letter-spacing: 1px; color: var(--bg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.treemap-pct { font: 400 9px/1 var(--f-mono); color: var(--bg); opacity: .75; margin-top: 3px; }
 .treemap-empty { font: 500 11px var(--f-mono); color: var(--dim); margin-top: 8px; }
 
 .panel-toggle-row { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; cursor: pointer; }
@@ -370,7 +375,12 @@ body {
 #alerts-banner { display: flex; flex-direction: column; gap: 9px; margin: 22px 24px 0; }
 #alerts-banner:empty { display: none; }
 .alert-unit { display: flex; flex-direction: column; }
-.alert-row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 12px; background: var(--panel-grad); border: 1px solid var(--panel-bd); animation: bannerIn .25s ease; }
+/* No `animation: bannerIn` here on purpose. alerts.js rewrites #alerts-banner's innerHTML on
+   every dashboard:update tick (~1s), so every row's DOM node is destroyed and recreated and an
+   entrance animation would restart forever instead of playing once. Re-apply it only once
+   alerts.js actually memoizes its render (and with a prefers-reduced-motion guard) -
+   docs/follow-ups.md item 11. @keyframes bannerIn is left defined for that follow-up. */
+.alert-row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 12px; background: var(--panel-grad); border: 1px solid var(--panel-bd); }
 .alert-row.warning { border-left: 3px solid var(--warn); box-shadow: 0 0 24px -8px var(--warn); }
 .alert-row.warning .alert-icon, .alert-row.warning .alert-title { color: var(--warn); }
 .alert-row.warning .alert-title { color: var(--tx-primary); }
