@@ -365,6 +365,37 @@ further here — flagging so it isn't mistaken for something this item already c
 
 ---
 
+## 9. Five panels still need a design pass before they can be reskinned
+
+**Status:** open. Written after Task 5 (the last of the 5 slices in
+`docs/plans/2026-08-13-reskin-phase-5-slices.md`), per that plan's Definition of Done.
+
+This plan reskinned five panels by porting `docs/prototype/index.html` markup 1:1: hero tiles,
+budget bars, agent lanes, the alert banner/CLI toast, and the optimize panel (this task). Five
+more panels remain on the old token/typography language and were deliberately out of scope,
+because none of them have a corresponding prototype section to port from:
+
+- **Insights**
+- **Settings (content)**
+- **Onboarding**
+- **Fleet / Team**
+- **Mini mode**
+
+Each of these needs its own short design pass — applying the same token/typography language this
+plan established (`--f-ui`/`--f-mono`, the `--tx-primary`/`--tx-muted`/`--dim` triad, `--r-panel`/
+`--r-chip`/`--r-tile` radii, the `--panel-grad`/`--acc-wash` card treatment) — before it can be
+planned with the same level of concreteness as this plan's five tasks. The layout itself is new
+invention for each, not a port, since no prototype markup exists to copy from.
+
+**Also blocked on all five being done:** deleting the compatibility aliases (design spec §9's
+"final slice", the v1 `--bg`/`--panel`/`--tx`/`--dim` names that Aether's token layer currently
+shims). That deletion can't happen until every panel — including these five — has stopped
+referencing the v1 alias names, which won't be true until each gets its own reskin pass.
+
+**Owner:** unassigned.
+
+---
+
 ## Not a code issue: rotate the deployed update token
 
 **Owner: Matt. Not actionable in this repo.**
