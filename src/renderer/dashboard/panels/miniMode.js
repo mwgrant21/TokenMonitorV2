@@ -16,10 +16,11 @@
       .map((period) => {
         const { used, limit } = state.budgetVsQuota[period];
         const pct = limit > 0 ? Math.min(100, (used / limit) * 100) : 0;
+        const tier = window.TT.budgetsPanel.tierFor(state, period);
         return `
         <div class="mini-bar-row">
           <span class="mini-bar-label">${period[0].toUpperCase()}${period.slice(1)}</span>
-          <div class="mini-track"><div class="mini-fill${pct >= 78 ? ' warn' : ''}" style="width:${pct}%"></div></div>
+          <div class="mini-track"><div class="mini-fill${tier === 'critical' ? ' crit' : tier === 'warning' ? ' warn' : ''}" style="width:${pct}%"></div></div>
           <span class="mini-bar-pct">${Math.round(pct)}%</span>
         </div>`;
       })

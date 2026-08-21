@@ -197,11 +197,12 @@ body {
 
 .budget-panel { margin: 20px 24px 0; background: var(--panel-grad); border: 1px solid var(--panel-bd); border-radius: var(--r-panel); padding: 15px 17px; box-shadow: 0 1px 0 var(--acc-wash) inset, 0 10px 30px rgba(0,0,0,.28); }
 .budget-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
-.budget-label { width: 64px; font: 500 11px var(--f-mono); color: var(--dim); }
-.budget-track { flex: 1; height: 10px; background: var(--panel2); border-radius: 6px; overflow: hidden; }
-.budget-fill { height: 100%; background: var(--acc); }
-.budget-fill.warn { background: var(--warn); }
-.budget-remaining { width: 96px; text-align: right; font: 500 11px var(--f-mono); }
+.budget-fill { height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--acc-deep), var(--acc)); box-shadow: 0 0 12px var(--acc-glow); transition: width .5s ease, background .3s; }
+.budget-fill.warn { background: var(--warn); box-shadow: 0 0 12px var(--warn); }
+.budget-fill.crit { background: var(--danger); box-shadow: 0 0 14px var(--danger); }
+.budget-track { flex: 1; height: 11px; background: var(--panel-inset); border: 1px solid var(--chrome-bd); border-radius: 6px; overflow: hidden; }
+.budget-label { width: 64px; font: 600 10px/1 var(--f-ui); letter-spacing: 1.5px; color: var(--tx-muted); text-transform: uppercase; }
+.budget-remaining { width: 96px; text-align: right; font: 400 10.5px/1 var(--f-mono); color: var(--tx-secondary); }
 .plan-usage-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
 .plan-sync-btn { font: 600 10px var(--f-mono); color: var(--acc); background: var(--soft); border: 1px solid var(--bd); border-radius: 5px; padding: 3px 10px; cursor: pointer; }
 .plan-sync-btn:hover { border-color: var(--acc); }
@@ -496,6 +497,7 @@ body.mini #mini-root { display: flex; flex-direction: column; gap: 10px; padding
 .mini-track { flex: 1; height: 7px; background: var(--panel2); border-radius: 4px; overflow: hidden; }
 .mini-fill { height: 100%; background: var(--acc); border-radius: 4px; }
 .mini-fill.warn { background: var(--warn); }
+.mini-fill.crit { background: var(--danger); }
 .mini-bar-pct { font: 500 9.5px var(--f-mono); color: var(--dim); width: 32px; text-align: right; }
 .mini-alert { margin-top: auto; font: 600 10.5px var(--f-mono); color: var(--tx); background: var(--panel2); border-left: 3px solid var(--warn); border-radius: 6px; padding: 8px 10px; }
 .mini-alert.critical { border-left-color: var(--danger); }

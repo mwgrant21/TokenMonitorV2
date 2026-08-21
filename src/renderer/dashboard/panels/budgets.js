@@ -2,13 +2,27 @@
 (function () {
   let syncState = 'idle'; // idle | syncing | failed
 
+  // Single source of truth for "is this budget window alarmed" - looks up the
+  // alertEngine's own budget-<period> alert rather than re-deciding with a
+  // second hardcoded threshold. Absent = not alarmed (below the user's
+  // configured thBudget, or alerts are disabled entirely).
+  function tierFor(state, period) {
+    const alert = (state.alerts || []).find((a) => a.id === `budget-${period}`);
+    return alert ? alert.severity : null;
+  }
+
+  function fillClass(tier) {
+    if (tier === 'critical') return ' crit';
+    if (tier === 'warning') return ' warn';
+    return '';
+  }
+
   function planBar(label, pct) {
     const p = Math.min(100, Math.max(0, Math.round(pct)));
-    const warn = p >= 78;
     return `
       <div class="budget-row">
         <div class="budget-label">${label}</div>
-        <div class="budget-track"><div class="budget-fill${warn ? ' warn' : ''}" style="width:${p}%"></div></div>
+        <div class="budget-track"><div class="budget-fill" style="width:${p}%"></div></div>
         <div class="budget-remaining">${p}%</div>
       </div>`;
   }
@@ -39,11 +53,10 @@
       .map((period) => {
         const { used, limit } = state.budgetVsQuota[period];
         const pct = limit > 0 ? Math.min(100, (used / limit) * 100) : 0;
-        const warn = pct >= 78;
         return `
         <div class="budget-row">
           <div class="budget-label">${period[0].toUpperCase()}${period.slice(1)}</div>
-          <div class="budget-track"><div class="budget-fill${warn ? ' warn' : ''}" style="width:${pct}%"></div></div>
+          <div class="budget-track"><div class="budget-fill${fillClass(tierFor(state, period))}" style="width:${pct}%"></div></div>
           <div class="budget-remaining">${Math.round(pct)}% . ${formatTokens(Math.max(0, limit - used))}</div>
         </div>`;
       })
@@ -67,5 +80,5 @@
       });
     }
   }
-  window.TT.budgetsPanel = { render };
+  window.TT.budgetsPanel = { render, tierFor };
 })();
