@@ -548,6 +548,10 @@ to choose:
 Note that plan-usage alarming is not currently silent when alerts are on: `state.alerts`'s
 `plan-week` entry surfaces it through the alert banner. It is only *this bar* that diverges.
 
+**Whichever way this closes, `test/budgetAlarmUnification.test.js`'s assertion that `planBar`
+keeps `const warn = p >= 78` must be updated too** — it currently locks the status quo in place,
+so a silent test failure is the first sign anyone touches this without reading this entry.
+
 **Owner:** unassigned.
 
 ---
