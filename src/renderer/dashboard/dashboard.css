@@ -40,6 +40,38 @@ body {
 .footer-alarm.warn { color: var(--warn); }
 .footer-alarm.crit { color: var(--danger); }
 
+/* Version readout + update-available chip + popover (shared-folder version
+   check, docs/plans/2026-08-04-shared-folder-version-check.md). Two of the
+   three states render no chip at all - .warning/.critical reuse the alert
+   banner's severity tokens, same reasoning as .footer-alarm above. */
+#footer-version-wrap { position: relative; }
+.footer-version-btn { background: transparent; border: none; color: var(--tx-dim); cursor: pointer; font: inherit; padding: 0; }
+.footer-version-btn:hover { color: var(--tx-secondary); }
+#footer-update-chip { display: none; cursor: pointer; font: 700 9px/1 var(--f-ui); letter-spacing: 1px; padding: 3px 7px; border-radius: var(--r-chip); border: 1px solid currentColor; background: transparent; margin-left: 8px; }
+#footer-update-chip.warning { color: var(--warn); }
+#footer-update-chip.critical { color: var(--danger); }
+#footer-version-backdrop { display: none; position: fixed; inset: 0; z-index: 1000; }
+#footer-version-pop {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 9px);
+  left: 0;
+  z-index: 1001;
+  width: 240px;
+  text-align: left;
+  background: var(--panel);
+  border: 1px solid var(--bd);
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.45);
+  font-family: var(--f-ui);
+  font-size: 12px;
+  color: var(--tx);
+  line-height: 1.5;
+}
+#footer-version-pop-current { font: 600 13px var(--f-mono); color: var(--tx); }
+#footer-version-pop-meta { color: var(--dim); margin-top: 6px; }
+
 .hero-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; padding: 22px 24px 0; }
 .hero-tile { background: var(--panel-grad); border: 1px solid var(--panel-bd); border-radius: var(--r-panel); padding: 15px 17px; box-shadow: 0 1px 0 var(--acc-wash) inset, 0 10px 30px rgba(0,0,0,.28); }
 .hero-label { font: 700 9.5px var(--f-mono); letter-spacing: .6px; color: var(--dim); text-transform: uppercase; }
