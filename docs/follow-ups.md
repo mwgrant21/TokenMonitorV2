@@ -11,7 +11,17 @@ Opened 2026-08-05 from the phases 0-2 whole-branch review
 
 ## 1. `findUncappedBashOutput` can never fire — latent bug
 
-**Status:** open. Predates the v2 move; present in v1 identically.
+**Status:** CLOSED 2026-08-21 in v2. See Resolution below.
+
+**v1 still has it, and worse — carried out of this fix as a finding, not a guess.** v1
+(`mwgrant21/TokenMonitor`, still under active SDD development) has the identical dead producer at
+`src/shared/transcriptParser.js:55`, and its rule reads the *event-level* `e._rawResultLength || 0`
+(`src/shared/optimizeRules.js:207`). The only place that field is ever assigned in the whole v1
+repo is **its own test file**, `test/optimizeRules.test.js:28` — the test constructs the shape the
+application never produces, so it passes while proving nothing. v1 also surfaces this rule as a
+user-visible grade row (`optimizeGrade.js:12`, "Output caps — *Command output kept lean.*"), so v1
+currently tells every user their command output is lean, unconditionally. Same one-line producer
+fix applies there.
 
 `packages/core/src/optimizeRules.ts:128-129` evaluates
 `result.resultLength ?? legacyEventLength ?? 0`. Neither field is ever set:
@@ -31,10 +41,40 @@ missing. That distinction matters: a rule that silently under-reports is worse t
 one that is absent, because the Optimize panel currently reads as "2 of 3 clean" when
 it is really "2 of 3 measured."
 
-**Fix:** carry the result size onto each tool result in `transcriptParser.js`
-(`item.content.length` or equivalent), then confirm the rule fires against a
-transcript with a large bash output.
+### Resolution (2026-08-21)
 
+`src/shared/transcriptParser.js` now computes a `toolResultLength(content)` and emits it as
+`resultLength` on every tool result. Content arrives in two shapes, both already present in
+`test/fixtures` — a plain string (`session-basic.jsonl`) and an array of blocks
+(`session-agent-spawn.jsonl`) — so the helper handles both and contributes nothing for non-text
+blocks such as images. It always returns a number, 0 included, never `undefined`.
+
+**Why this hid for so long, and the lesson.** Both sides had passing tests. `packages/core`'s suite
+covered `findUncappedBashOutput` with a hand-built result that set `resultLength`; the app's suite
+covered `tool_result` parsing. Neither suite crossed the seam between them, and the seam was the
+entire defect. The regression test that had to exist is
+`test/transcriptParser.test.js`'s *"a large bash tool_result makes the uncapped-bash-output rule
+fire"*, which parses real transcript lines and asserts on `evaluateOptimizeRules` output. Three
+unit tests pin the producer's three content shapes alongside it.
+
+**Verified against real data, not just fixtures.** Running the fixed parser over 40 real Claude Code
+transcripts from `~/.claude/projects`: 6,197 tool results, **all 6,197** now carrying a numeric
+`resultLength`, 269 of them over the 5,000-char threshold, largest 44,730 chars. Evaluating the rule
+across those same 40 sessions, it fires on **14** of them (e.g. *"10 Bash calls returned over 5000
+chars with no output limiting"*). Before this change it fired on zero sessions, always.
+
+The Optimize panel's headline consequence is resolved with it: it no longer reads "clean" for a rule
+it was never actually measuring.
+
+**One thing deliberately left.** `optimizeRules.ts`'s `legacyEventLength` fallback
+(`result.resultLength ?? legacyEventLength ?? 0`) is now unreachable from this app and
+`_rawResultLength` exists in neither consumer, so it is dead code. It was **not** deleted: removing
+it changes core's contract for any producer that sets only the event-level field, and Aether OS —
+core's other intended consumer — is not yet wired to this package, so that cannot be verified from
+here. The comment at that line records this; delete it as part of wiring Aether OS to
+`packages/core`.
+
+**Owner:** closed by the follow-up pass of 2026-08-21.
 ## 2. `findCostOfThrash` changes the `$/wk` total versus v1 — disclosure owed
 
 **Status:** open until the first user-facing build ships.
@@ -480,11 +520,15 @@ decision about the treemap's colour ramp.
 
 ## 11. `alerts.js`'s "renderWithMemo" does not memoize — the alert banner rebuilds every second
 
-**Status:** open. Opened 2026-08-21 by the final-review fix wave, which removed the symptom rather
-than the cause.
+**Status:** open, but narrowed. Opened 2026-08-21 by the final-review fix wave, which removed the
+symptom rather than the cause. **The memoization half was closed 2026-08-21** — see Resolution
+below; what remains is row reconciliation, which is also what the entrance animation waits on.
 
-`src/main/main.js` pushes a `dashboard:update` roughly every 1000ms. `alerts.js` exposes its
-render as `renderWithMemo`, but that function only stashes `el.__lastState` and delegates to
+*The two paragraphs below are the original diagnosis, kept as written; see Resolution for what
+changed.*
+
+`src/main/main.js` pushes a `dashboard:update` roughly every 1000ms. `alerts.js` exposed its
+render as `renderWithMemo`, but that function only stashed `el.__lastState` and delegates to
 `render`, which unconditionally does `el.innerHTML = visible.map(rowHtml).join('')`. Nothing is
 compared, so every alert row's DOM node — and the CLI toast's — is destroyed and recreated once a
 second for as long as any alert is active. Confirmed live: a node marked on one tick is gone by
@@ -497,13 +541,59 @@ because the node is recreated each tick, the animation restarted every second, f
 the `animation` declaration (the safe, merge-blocking fix) and left `@keyframes bannerIn` defined
 for whoever closes this item.
 
-**Fix:** make the render actually memoize — cheapest version is to key off the rendered alert set
-(ids + severities + `expandedId` + the dismissed set) and skip the `innerHTML` write when nothing
-changed; a more thorough version reconciles rows in place so an existing row survives a change to
-a sibling. Then re-apply `animation: bannerIn .25s ease` to `.alert-row`, wrapped in a
-`@media (prefers-reduced-motion: no-preference)` guard, and verify live that it plays exactly
-once per newly-appearing alert and not at all on subsequent ticks. `test/alertsMarkup.test.js`
-is the natural place for the regression test.
+### Resolution, part 1 — the render actually memoizes (2026-08-21)
+
+`render` and `renderToast` now compute a key over everything that can change a rendered byte
+(`alertsEnabled`, the alert count, `expandedId`, and per visible alert its id, severity, title,
+detail, why, fix and chip labels/kinds) and skip the `innerHTML` write when the key is unchanged.
+The key is deliberately content-based, not identity-based: `main.js` sends a **fresh** state object
+every tick, so `state === el.__lastState` would never hit. `el.__alerts` is refreshed on every tick
+regardless of memo outcome, so a skipped write cannot leave the chip click handler reading stale
+alerts.
+
+Four regression tests in `test/alertsMarkup.test.js` cover it — two that an unchanged tick does not
+rewrite the banner or the toast, two that a changed alert set still does. They load the real panel
+into a minimal DOM stub via `node:vm` and **count `innerHTML` writes**, because every other renderer
+test in this repo asserts on source text or CSS, and a source-text assertion cannot tell a real memo
+from a stub that stashes state and rewrites anyway — precisely the bug being fixed.
+
+### Why the animation still cannot come back
+
+Memoizing was necessary but is **not sufficient**, and the original Fix note underestimated this.
+`src/shared/alertEngine.js` embeds live figures in the text of the alerts most likely to be on
+screen:
+
+| alert | field | moves when |
+|---|---|---|
+| `budget-<window>` | title `... budget at 84%`, detail `41.2k of 50.0k tokens used` | every 1% of budget / every ~100 tokens |
+| `burn-spike` | detail `${Math.round(burnNow)} tok/min vs ...` | effectively every tick |
+| `agent-ceiling-*` | detail `${fmtTokens(agent.tokens)} tokens - still running` | every ~100 tokens |
+
+So during active work the memo key legitimately changes, the row is legitimately rebuilt, and
+`animation: bannerIn` would replay — the symptom `d12a6fe` removed, back in a quieter form. The memo
+is still a real win for the all-clear card, idle sessions, and the alerts whose detail is static
+(`resets <time>`), but it does not deliver "plays exactly once per newly-appearing alert".
+
+`.alert-row` therefore stays un-animated, and `test/alertsMarkup.test.js` now **fails if any
+`.alert-row` rule grows an `animation` declaration** — behind a media query or not. That guard was
+mutation-checked: re-adding the guarded rule makes it fail, removing it makes it pass again.
+
+**What is left to close this item.** Reconcile rows in place, keyed by alert id, so an alert that
+persists keeps its DOM node across content changes and across a sibling appearing or leaving. Then
+re-apply `animation: bannerIn .25s ease` to `.alert-row` behind a
+`@media (prefers-reduced-motion: no-preference)` guard (it never had one), delete the counter-test
+above, and verify live that it plays once per newly-appearing alert and not on subsequent ticks.
+
+Two traps for whoever does it:
+
+- **Detaching and re-attaching a node restarts CSS animations in Blink.** "Rebuild into a
+  `DocumentFragment` and re-append" reintroduces the bug while looking like reconciliation. Reused
+  nodes must stay attached, and only move when their position actually changed.
+- **A hand-rolled DOM stub will not carry this.** Reconciliation needs `querySelectorAll`,
+  `classList`, `textContent` and `insertBefore`; a stub faithful enough to test it honestly is a
+  bigger liability than the code it tests. This repo has zero test dependencies by design, so
+  closing this means a deliberate call — add a DOM library as a devDependency, or verify in a real
+  Chromium via `scripts/probe-renderer.js` / the `npm install --no-save playwright-core` pattern.
 
 **Owner:** unassigned.
 
