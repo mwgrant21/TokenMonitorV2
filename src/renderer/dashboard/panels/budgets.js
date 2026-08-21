@@ -19,10 +19,11 @@
 
   function planBar(label, pct) {
     const p = Math.min(100, Math.max(0, Math.round(pct)));
+    const warn = p >= 78;
     return `
       <div class="budget-row">
         <div class="budget-label">${label}</div>
-        <div class="budget-track"><div class="budget-fill" style="width:${p}%"></div></div>
+        <div class="budget-track"><div class="budget-fill${warn ? ' warn' : ''}" style="width:${p}%"></div></div>
         <div class="budget-remaining">${p}%</div>
       </div>`;
   }
