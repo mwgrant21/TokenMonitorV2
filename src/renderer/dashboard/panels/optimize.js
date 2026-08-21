@@ -48,11 +48,10 @@
       el.innerHTML = `${header}<div class="optimize-empty">Looking healthy - no findings.</div>`;
       return;
     }
-    const borders = ['var(--acc)', 'var(--acc2)', 'var(--warn)'];
     const cards = findings
       .map(
-        (f, i) => `
-        <div class="optimize-card" style="border-left-color:${borders[i % borders.length]}">
+        (f) => `
+        <div class="optimize-card${f.recurring ? ' recurring' : ''}">
           <div class="optimize-card-title">${escapeHtml(f.title)}</div>
           <div class="optimize-card-detail">${escapeHtml(f.detail)}</div>
           ${
