@@ -5,14 +5,15 @@
     const agents = state.runningAgents;
     const rows = agents
       .map(
-        (agent, i) => `
+        (agent) => `
       <div class="agent-lane">
+        <span class="agent-dot on"></span>
         <div class="agent-label">${escapeHtml(agent.subagentType || 'agent')}</div>
         <div class="agent-track"><div class="agent-bar active" style="width:100%"></div></div>
       </div>`
       )
       .join('');
-    el.innerHTML = `<div class="hero-label">${agents.length} active</div>${rows || '<div class="agent-label" style="margin-top:8px">none running</div>'}`;
+    el.innerHTML = `<div class="hero-label">${agents.length} active</div>${rows || '<div class="agent-label">none running</div>'}`;
   }
 
   function renderTaskBreakdown(state) {
@@ -42,7 +43,7 @@
       el.innerHTML = `${header}<div class="treemap-empty">no activity yet.</div>`;
       return;
     }
-    const colors = ['var(--acc)', 'var(--acc2)', 'var(--warn)', 'var(--panel2)', 'var(--dim)'];
+    const colors = ['var(--acc)', 'var(--acc-deep)', 'var(--warn)', 'var(--panel-inset)', 'var(--tx-dim)'];
     const blocks = breakdown
       .map((b, i) => {
         const tokens = b.tokens || 0;
