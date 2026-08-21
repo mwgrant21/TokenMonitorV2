@@ -159,7 +159,9 @@ cyan/light and emerald/light were probed the same way and every element passes i
 and after and are byte-identical — the dark and legacy sets did not move.
 
 **Residual, deliberately not fixed here (new follow-up, item 8):** `.alert-row.critical` and
-`.optimize-grade` paint text in `var(--bg)` on a `var(--warn)` fill. With the prototype's
+`.optimize-grade` paint text in `var(--bg)` on a `var(--warn)` fill. (True as written on
+2026-08-20; `.alert-row.critical` no longer does — see item 8, whose scope has since narrowed to
+`.optimize-grade` alone.) With the prototype's
 `--warn`, that pairing lands at 4.54 (cyan), 4.56 (emerald), 4.42 (azure), 4.41 (steel), 4.38
 (violet) — three palettes sit just under the 4.5 floor. This is a 3.1x improvement on the 1.41
 that opened this item, and it is the prototype's own value, so it was shipped as-is rather than
@@ -299,17 +301,22 @@ phases-3-4.md`. Small, one-line fix; pick up opportunistically or as its own qui
 
 ---
 
-## 8. Text-on-`--warn`-fill sits ~0.1 under WCAG AA in three light palettes
+## 8. `.optimize-grade`'s text-on-`--warn`-fill sits ~0.1 under WCAG AA in three light palettes
 
-**Status:** open. Needs a design decision, which is why item 5 did not absorb it.
+**Status:** open, and now narrower than when it was written. Needs a design decision, which is
+why item 5 did not absorb it.
 
-Two rules paint text in `var(--bg)` on a `var(--warn)` fill:
+**Scope narrowed 2026-08-21.** This item originally tracked *two* rules that painted text in
+`var(--bg)` on a `var(--warn)` fill. The first, `.alert-row.critical`'s
+`background: var(--warn); color: var(--bg)` treatment (and the `color`/`opacity: .8` its
+`.alert-detail` inherited from it), **no longer exists** — commit `f8fdf60`
+("fix(reskin): alert banner - distinguish critical from warning, adopt alarm-border language")
+replaced the whole alert-row block with a border-left accent on a `var(--panel-grad)` card, so no
+alert text sits on an alarm fill any more. Only the second rule survives:
 
-- `dashboard.css:335` — `.alert-row.critical { background: var(--warn); color: var(--bg); }`
-  (its `.alert-title` is `700 12.5px`, so the 4.5 normal-text floor applies, not 3). Its sibling
-  `.alert-detail` (`:341`) inherits the same `color: var(--bg)` and applies `opacity: .8` on top,
-  so its *effective* ratio is below every figure in the table below — same rule, same fix.
-- `dashboard.css:194` — `.optimize-grade { color: var(--bg); background: var(--warn); }`
+- `.optimize-grade` — `{ color: var(--bg); background: var(--warn); }`, in `dashboard.css`'s
+  optimize-panel block. (Line numbers are deliberately omitted; the two this item used to cite
+  had already drifted twice.)
 
 With the light-mode `--warn` (`#96660f`) that item 5 introduced, that pairing measures:
 
@@ -338,7 +345,7 @@ value was checked once already, on 2026-08-20, and it fails.
 
 **Candidate fixes, none of them free:**
 
-1. Repoint both rules' ink at `var(--acc-ink)`, which is already `#ffffff` in all five Aether
+1. Repoint the rule's ink at `var(--acc-ink)`, which is already `#ffffff` in all five Aether
    light palettes. Pure white on `#96660f` measures 4.99 — clears 4.5 everywhere, verified. But
    `--acc-ink` is a dark colour in dark mode, so this changes dark rendering too and needs its
    own verification.
@@ -356,10 +363,13 @@ only the `tx-*` tokens, never the alarm triple and never the five Aether palette
 to alarm colours x 5 Aether palettes x 2 modes would have caught both, and is worth doing
 alongside whichever fix is chosen.
 
-**Adjacent, not part of this item:** `.alert-row.critical` painting a **critical** alert in
-`var(--warn)` rather than `var(--danger)` looks like a pre-existing semantic mismatch, independent
-of the contrast question above (found during the final-review re-review). Not investigated
-further here — flagging so it isn't mistaken for something this item already covers.
+**Adjacent, now resolved:** this item used to flag `.alert-row.critical` painting a **critical**
+alert in `var(--warn)` rather than `var(--danger)` as an open, uninvestigated semantic mismatch.
+Commit `f8fdf60` fixed it — `.alert-row.critical` is now `border-left: 3px solid var(--danger)`
+with a matching `--danger` glow and icon, and `.alert-row.warning` keeps `--warn`, so the two
+severities are distinguishable at a glance. The related `--alarm`-instead-of-severity mismatch on
+`#cli-toast` and `.agent-bar.active` was closed separately by commit `5768f3c`. Nothing about the
+`--warn`-vs-`--danger` question remains open; only the `.optimize-grade` contrast figure above does.
 
 **Owner:** unassigned.
 
@@ -369,11 +379,22 @@ further here — flagging so it isn't mistaken for something this item already c
 
 **Status:** open. Written after Task 5 (the last of the 5 slices in
 `docs/plans/2026-08-13-reskin-phase-5-slices.md`), per that plan's Definition of Done.
+Corrected 2026-08-21 by the final-review fix wave; the original wording had four factual errors,
+noted inline below so the corrections aren't mistaken for a change of scope.
 
-This plan reskinned five panels by porting `docs/prototype/index.html` markup 1:1: hero tiles,
-budget bars, agent lanes, the alert banner/CLI toast, and the optimize panel (this task). Five
-more panels remain on the old token/typography language and were deliberately out of scope,
-because none of them have a corresponding prototype section to port from:
+Across its five tasks, that plan restyled **seven UI surfaces plus the CLI toast**: hero tiles
+(Task 1), the budget-vs-quota and plan-usage bars (Task 2), agent lanes, task breakdown and the
+treemap (Task 3 — three panels in one file), the alert banner and its CLI toast (Task 4), and the
+optimize panel (Task 5). "Five panels" undercounted by treating Task 3 as one surface.
+
+It did this by adopting the prototype's CSS **values** onto this app's own existing class names —
+explicitly *not* by porting the prototype's markup 1:1. That is the plan's own central convention
+(plan lines 12-15: "adopt the prototype's CSS *values* onto our own class names, don't rename to
+match the prototype's markup"), inherited from Task 7 of reskin-phases-3-4. An earlier draft of
+this item asserted the opposite; it was wrong.
+
+Five panels remain largely on the old token/typography language and were deliberately out of
+scope, because none of them have a corresponding prototype section to port from:
 
 - **Insights**
 - **Settings (content)**
@@ -381,16 +402,151 @@ because none of them have a corresponding prototype section to port from:
 - **Fleet / Team**
 - **Mini mode**
 
+"Largely", not entirely: Insights and Settings already changed under this branch by
+**shared-class bleed-through**. Task 1 restyled `.hero-label` (from the old mono font and spacing
+to `600 9px/1 var(--f-ui)`, 2px letter-spacing, uppercase, `--tx-muted`), and that same class is
+consumed by `insights.js` for all four of its section headings and by `index.html`'s settings
+popover for six of its group labels. So those two panels' *headings* are already in the new
+language while the rest of their content is not — a partial, unplanned state, not a clean
+"untouched" one. Whoever picks those two up should expect to reconcile the mix rather than
+restyle from scratch.
+
 Each of these needs its own short design pass — applying the same token/typography language this
 plan established (`--f-ui`/`--f-mono`, the `--tx-primary`/`--tx-muted`/`--dim` triad, `--r-panel`/
 `--r-chip`/`--r-tile` radii, the `--panel-grad`/`--acc-wash` card treatment) — before it can be
 planned with the same level of concreteness as this plan's five tasks. The layout itself is new
 invention for each, not a port, since no prototype markup exists to copy from.
 
+**Also deferred, and belonging here rather than to any one task:** the burn-now hero tile's
+sparkline. The prototype has one (`.spark`/`#spark`), but it needs a data source this plan didn't
+scope — a recent-points slice separate from `state.insights.series`, which is Insights-panel-owned
+data — and it isn't required for the hero tile's typography/colour port to be complete. The plan's
+own closing section asks for it to be "tracked as a follow-up alongside the deferred slices";
+this is that tracking.
+
 **Also blocked on all five being done:** deleting the compatibility aliases (design spec §9's
 "final slice", the v1 `--bg`/`--panel`/`--tx`/`--dim` names that Aether's token layer currently
 shims). That deletion can't happen until every panel — including these five — has stopped
 referencing the v1 alias names, which won't be true until each gets its own reskin pass.
+
+**Owner:** unassigned.
+
+---
+
+## 10. Treemap block labels need per-block ink, not one fixed `var(--bg)`
+
+**Status:** open. Opened 2026-08-21 by the final-review fix wave, which fixed the acute half and
+deliberately deferred this half.
+
+`activity.js`'s `renderTreemap` paints each block's background inline from a fixed five-colour
+array — `--acc`, `--acc-deep`, `--warn`, `--panel-inset`, `--tx-dim` — while `dashboard.css`'s
+`.treemap-cat`/`.treemap-pct` paint every label in one fixed ink. Task 3 dropped that ink
+declaration entirely (labels fell back to body's `var(--tx)`, and the dominant `--acc` block
+measured **1.18:1** on steel/dark); commit `d12a6fe` restored `color: var(--bg)`, the pre-branch
+value, because it is proven and safe rather than a new design decision.
+
+That restores legibility on the blocks that matter, but not on all five. Measured live (real
+renderer, `getComputedStyle` + WCAG ratio against the composited block background), label vs.
+its own block:
+
+| block | steel/dark | steel/light | cyan/light |
+|---|---|---|---|
+| 1 · `--acc` | 15.33 | 7.19 | 3.43 |
+| 2 · `--acc-deep` | 7.45 | 10.36 | 4.25 |
+| 3 · `--warn` | 12.30 | 4.41 | 4.54 |
+| 4 · `--panel-inset` | **1.07** | **1.11** | **1.08** |
+
+The `--panel-inset` block is unreadable in every palette, because `--bg` and `--panel-inset` are
+near-identical by construction — a panel inset is *meant* to sit close to the page background.
+The `--acc` block on cyan/light (3.43) is likewise short of the 4.5 floor for its 10px bold label.
+Both are **pre-existing, not regressions**: pre-Task-3 the array read `--acc`/`--acc2`/`--warn`/
+`--panel2`/`--dim`, and `--acc2`/`--panel2`/`--dim` are just tokens.css compatibility aliases for
+`--acc-deep`/`--panel-inset`/`--tx-dim`, so the block colours are byte-identical to what shipped
+before this branch. Only the 4th and 5th categories are affected, and only when a session has
+four or more categories with ≥8% share each (below 8% the label is not rendered at all).
+
+**Fix:** port the prototype's mechanism instead of picking one ink. `docs/prototype/index.html`
+computes each block's label colour in JS from that block's own background luminance and writes it
+per block, so `--panel-inset` and `--tx-dim` blocks get light ink while `--acc`/`--warn` blocks get
+dark. That is a real change — it moves colour selection out of CSS and into `activity.js`, and
+needs its own contrast verification across all five Aether palettes in both modes. Alternatively,
+retire `--panel-inset`/`--tx-dim` from the block palette in favour of two more colours with
+adequate contrast against a single fixed ink; that is a smaller change but a genuine design
+decision about the treemap's colour ramp.
+
+**Owner:** unassigned. Naturally pairs with whichever task next touches `renderTreemap`.
+
+---
+
+## 11. `alerts.js`'s "renderWithMemo" does not memoize — the alert banner rebuilds every second
+
+**Status:** open. Opened 2026-08-21 by the final-review fix wave, which removed the symptom rather
+than the cause.
+
+`src/main/main.js` pushes a `dashboard:update` roughly every 1000ms. `alerts.js` exposes its
+render as `renderWithMemo`, but that function only stashes `el.__lastState` and delegates to
+`render`, which unconditionally does `el.innerHTML = visible.map(rowHtml).join('')`. Nothing is
+compared, so every alert row's DOM node — and the CLI toast's — is destroyed and recreated once a
+second for as long as any alert is active. Confirmed live: a node marked on one tick is gone by
+the next.
+
+That is wasteful on its own, but it also silently broke a deliverable. Task 4 added
+`@keyframes bannerIn` and `animation: bannerIn .25s ease` on `.alert-row` for a one-time entrance;
+because the node is recreated each tick, the animation restarted every second, forever, with no
+`prefers-reduced-motion` guard — on the app's highest-priority surface. Commit `d12a6fe` dropped
+the `animation` declaration (the safe, merge-blocking fix) and left `@keyframes bannerIn` defined
+for whoever closes this item.
+
+**Fix:** make the render actually memoize — cheapest version is to key off the rendered alert set
+(ids + severities + `expandedId` + the dismissed set) and skip the `innerHTML` write when nothing
+changed; a more thorough version reconciles rows in place so an existing row survives a change to
+a sibling. Then re-apply `animation: bannerIn .25s ease` to `.alert-row`, wrapped in a
+`@media (prefers-reduced-motion: no-preference)` guard, and verify live that it plays exactly
+once per newly-appearing alert and not at all on subsequent ticks. `test/alertsMarkup.test.js`
+is the natural place for the regression test.
+
+**Owner:** unassigned.
+
+---
+
+## 12. `planBar` and the budget-vs-quota bars now alarm on different logic, with identical styling
+
+**Status:** open by design, recorded 2026-08-21 so the divergence isn't rediscovered as a bug.
+
+Both bar types in `src/renderer/dashboard/panels/budgets.js` render the same `.budget-fill.warn`
+treatment, so a user cannot tell them apart. They no longer decide *when* to go amber the same way:
+
+- **Budget vs. quota rows** call `tierFor(state, period)`, which looks up the alertEngine's own
+  `budget-<period>` alert. That respects the user's configured `thBudget` and, crucially, respects
+  `alerts.enabled` — with alerts switched off there is no alert to find, so these bars stay
+  neutral at any percentage, 200% included.
+- **`planBar`** (the plan-usage bars) still uses its own pre-existing `const warn = p >= 78`, so it
+  goes amber at 78% regardless of `thBudget` and regardless of whether alerts are enabled.
+
+**Why it is like this.** Task 2 of `docs/plans/2026-08-13-reskin-phase-5-slices.md` unified the
+hardcoded 78% threshold into `tierFor`. Its brief's "Current state" narrative claimed `planBar` had
+no tier of its own, which was factually wrong — the diff showed a pre-existing `p >= 78` there —
+and the task's Step 3 code block silently deleted it. The mid-plan ruling (progress ledger, Task 2)
+restored `planBar` byte-for-byte and read the plan's "don't invent a new tier for `planBar`, it's
+out of scope" instruction as "don't *change* `planBar`'s tier logic either". Commit `43d93f2` is
+that restoration; `test/budgetAlarmUnification.test.js` now asserts both halves — that the row loop
+calls `tierFor` and that `planBar`'s own check is untouched. The ruling's scope was right; this
+entry only records the consequence it left behind.
+
+**What closing it looks like — a decision, not a patch.** Whoever gives `planBar` a real tier has
+to choose:
+
+1. **Unify** — route `planBar` through `tierFor` too. Consistent, and honours the alerts-disabled
+   switch everywhere. But it needs an alert id to look up, and `state.alerts`'s plan-usage entry is
+   `plan-week`, which covers only one of `planBar`'s three bars (Session 5h, Week, Week-by-model).
+   The other two would need alertEngine rules that do not exist yet.
+2. **Keep them deliberately separate**, and make that legible — plan usage is a *provider* limit the
+   user does not control, unlike a self-set budget, so a fixed threshold that ignores `thBudget` and
+   the alerts toggle is arguably correct. If so, the two bar types should stop sharing
+   `.budget-fill.warn` so the difference is visible rather than hidden.
+
+Note that plan-usage alarming is not currently silent when alerts are on: `state.alerts`'s
+`plan-week` entry surfaces it through the alert banner. It is only *this bar* that diverges.
 
 **Owner:** unassigned.
 
