@@ -1,5 +1,20 @@
 // src/shared/transcriptParser.js
 
+// Size of a tool result's payload, in characters. findUncappedBashOutput in
+// @tokenmonitor/core compares this against its 5000-char threshold; before this
+// existed the rule read undefined, evaluated 0, and could never fire - the rule
+// body was correct, its input was missing (docs/follow-ups.md item 1). Content
+// arrives either as a plain string or as an array of blocks (both shapes are in
+// test/fixtures); non-text blocks such as images contribute no characters.
+function toolResultLength(content) {
+  if (typeof content === 'string') return content.length;
+  if (!Array.isArray(content)) return 0;
+  return content.reduce(
+    (sum, block) => sum + (block && typeof block.text === 'string' ? block.text.length : 0),
+    0,
+  );
+}
+
 function parseTranscriptLine(rawLine) {
   const trimmed = (rawLine || '').trim();
   if (!trimmed) return null;
@@ -52,7 +67,7 @@ function parseTranscriptLine(rawLine) {
         : [];
     const toolResults = content
       .filter((item) => item.type === 'tool_result')
-      .map((item) => ({ toolUseId: item.tool_use_id }));
+      .map((item) => ({ toolUseId: item.tool_use_id, resultLength: toolResultLength(item.content) }));
     const textItem = content.find((item) => item.type === 'text');
     const isHumanPrompt = toolResults.length === 0 && !!textItem;
     return {
