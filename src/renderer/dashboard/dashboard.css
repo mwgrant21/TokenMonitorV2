@@ -378,11 +378,15 @@ body {
 #alerts-banner { display: flex; flex-direction: column; gap: 9px; margin: 22px 24px 0; }
 #alerts-banner:empty { display: none; }
 .alert-unit { display: flex; flex-direction: column; }
-/* No `animation: bannerIn` here on purpose. alerts.js rewrites #alerts-banner's innerHTML on
-   every dashboard:update tick (~1s), so every row's DOM node is destroyed and recreated and an
-   entrance animation would restart forever instead of playing once. Re-apply it only once
-   alerts.js actually memoizes its render (and with a prefers-reduced-motion guard) -
-   docs/follow-ups.md item 11. @keyframes bannerIn is left defined for that follow-up. */
+/* No `animation: bannerIn` here on purpose, and none behind a media query either -
+   test/alertsMarkup.test.js fails if any .alert-row rule grows an `animation`.
+   Memoizing alerts.js (follow-ups item 11) was necessary but not sufficient: the
+   memo key covers rendered text, and alertEngine embeds live figures in title and
+   detail (budget percent, tok/min, fmtTokens), so the key legitimately changes as
+   those numbers move and the row is legitimately rebuilt - the entrance would still
+   replay. It can only return once rows reconcile in place so a persisting alert
+   keeps its node. Re-apply it then, behind a prefers-reduced-motion: no-preference
+   guard it never had. @keyframes bannerIn is left defined for that follow-up. */
 .alert-row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 12px; background: var(--panel-grad); border: 1px solid var(--panel-bd); }
 .alert-row.warning { border-left: 3px solid var(--warn); box-shadow: 0 0 24px -8px var(--warn); }
 .alert-row.warning .alert-icon, .alert-row.warning .alert-title { color: var(--warn); }

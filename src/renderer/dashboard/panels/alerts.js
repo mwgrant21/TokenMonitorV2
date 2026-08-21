@@ -39,12 +39,32 @@
       </div>`;
   }
 
+  // Memo keys. main.js pushes a fresh state object roughly every 1000ms, so the
+  // key must cover rendered *content*, not object identity. Everything that can
+  // change a rendered byte belongs here; anything else would pin stale DOM.
+  function bannerKey(state, alertCount, visible) {
+    return JSON.stringify([
+      state.alertsEnabled ? 1 : 0,
+      alertCount,
+      expandedId,
+      visible.map((a) => [a.id, a.severity, a.title, a.detail, a.why, a.fix,
+        (a.chips || []).map((c) => [c.label, c.kind])]),
+    ]);
+  }
+
+  function toastKey(top) {
+    return top ? JSON.stringify([top.id, top.severity, top.title, top.detail]) : 'none';
+  }
+
   function renderToast(alerts) {
     const el = document.getElementById('cli-toast');
     if (!el) return;
     // Most severe active alert, skipping banner-dismissed and toast-dismissed.
     const top = alerts.find((a) => !dismissed.has(a.id) && a.id !== toastDismissedId);
     if (toastDismissedId && !alerts.some((a) => a.id === toastDismissedId)) toastDismissedId = null;
+    const key = toastKey(top);
+    if (el.__memoKey === key) return;
+    el.__memoKey = key;
     if (!top) { el.style.display = 'none'; el.innerHTML = ''; return; }
     el.style.display = '';
     el.innerHTML = `
@@ -68,15 +88,21 @@
     // Toast must track every render path including all-clear transitions.
     renderToast(alerts);
 
+    // Stash current alerts so click handlers can find chips by index. Updated on
+    // every tick, memo hit or not, so a skipped write cannot leave chips stale.
+    el.__alerts = alerts;
+
     const visible = alerts.filter((a) => !dismissed.has(a.id));
+    const key = bannerKey(state, alerts.length, visible);
+    if (el.__memoKey === key) return;
+    el.__memoKey = key;
+
     if (alerts.length === 0 && state.alertsEnabled) {
       el.innerHTML = `<div class="alert-allclear"><span class="alert-allclear-check">&#10003;</span>
         All healthy - no waste detected</div>`;
       return;
     }
     el.innerHTML = visible.map(rowHtml).join('');
-    // Stash current alerts so click handlers can find chips by index.
-    el.__alerts = alerts;
   }
 
   function onBannerClick(e) {
