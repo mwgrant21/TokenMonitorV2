@@ -15,6 +15,7 @@ body {
 @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
 @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .45; transform: scale(.82); } }
 @keyframes flow { 0% { background-position: 0 0; } 100% { background-position: 22px 0; } }
+@keyframes bannerIn{from{transform:translateY(-6px);opacity:0}to{transform:none;opacity:1}}
 
 /* ============ CHROME: titlebar + footer ============
    From docs/prototype/index.html:241-244 (.titlebar) and :480 (.footer). The
@@ -367,21 +368,20 @@ body {
 #alerts-banner { display: flex; flex-direction: column; gap: 9px; margin: 22px 24px 0; }
 #alerts-banner:empty { display: none; }
 .alert-unit { display: flex; flex-direction: column; }
-.alert-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; }
-.alert-row.warning { background: var(--panel); border: 1px solid var(--bd); border-left: 3px solid var(--warn); }
+.alert-row { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 12px; background: var(--panel-grad); border: 1px solid var(--panel-bd); animation: bannerIn .25s ease; }
+.alert-row.warning { border-left: 3px solid var(--warn); box-shadow: 0 0 24px -8px var(--warn); }
 .alert-row.warning .alert-icon, .alert-row.warning .alert-title { color: var(--warn); }
-.alert-row.warning .alert-title { color: var(--tx); }
-.alert-row.critical { background: var(--warn); color: var(--bg); border: 1px solid var(--warn); border-left: 3px solid var(--warn); }
+.alert-row.warning .alert-title { color: var(--tx-primary); }
+.alert-row.critical { border-left: 3px solid var(--danger); box-shadow: 0 0 24px -8px var(--danger); }
+.alert-row.critical .alert-icon { color: var(--danger); }
 .alert-row.open { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
-.alert-icon { font-size: 15px; line-height: 1; }
-.alert-row.warning .alert-icon { color: var(--warn); }
+.alert-icon { font-size: 16px; line-height: 1; }
 .alert-body { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
-.alert-title { font: 700 12.5px var(--f-ui); }
-.alert-detail { font: 500 10.5px var(--f-mono); opacity: .8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.alert-fix-btn { font: 600 10px var(--f-mono); border-radius: 5px; padding: 4px 9px; cursor: pointer; background: var(--soft); border: 1px solid var(--bd); color: var(--tx); white-space: nowrap; }
-.alert-row.critical .alert-fix-btn { background: rgba(0,0,0,.18); border-color: rgba(0,0,0,.25); color: var(--bg); }
+.alert-title { font: 700 12px/1.3 var(--f-ui); letter-spacing: .6px; color: var(--tx-primary); }
+.alert-detail { font: 400 10px/1.5 var(--f-mono); color: var(--tx-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.alert-fix-btn { font: 600 10px/1 var(--f-ui); letter-spacing: .8px; border-radius: var(--r-chip); padding: 8px 12px; cursor: pointer; background: var(--acc-wash); border: 1px solid var(--active-bd); color: var(--tx-primary); white-space: nowrap; }
+.alert-fix-btn:hover { border-color: var(--acc); }
 .alert-dismiss { background: transparent; border: none; font-size: 15px; line-height: 1; cursor: pointer; color: var(--dim); }
-.alert-row.critical .alert-dismiss { color: var(--bg); }
 
 /* Expandable fix panel - reads as one unit with its row */
 .alert-fix-panel { background: var(--panel); border: 1px solid var(--bd); border-top: none; border-left: 3px solid var(--warn); border-radius: 0 0 10px 10px; padding: 11px 13px; }
@@ -400,11 +400,11 @@ body {
 
 /* CLI-pane toast - docked above the bottom edge of the terminal pane */
 #terminal-pane { position: relative; flex: 0 0 560px; }
-#cli-toast { position: absolute; left: 10px; right: 22px; bottom: 10px; z-index: 5; display: flex; align-items: center; gap: 9px; background: var(--panel2); border: 1px solid var(--bd); border-left: 3px solid var(--warn); border-radius: 8px; padding: 8px 10px; box-shadow: 0 6px 18px rgba(0,0,0,.35); }
-.cli-toast-icon { font-size: 13px; line-height: 1; color: var(--warn); }
+#cli-toast { position: absolute; left: 10px; right: 22px; bottom: 10px; z-index: 5; display: flex; align-items: center; gap: 9px; background: var(--panel-grad); border: 1px solid var(--panel-bd); border-left: 3px solid var(--alarm); border-radius: 12px; padding: 10px 12px; box-shadow: 0 0 24px -8px var(--alarm-glow); }
+.cli-toast-icon { font-size: 14px; line-height: 1; color: var(--alarm); }
 .cli-toast-body { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
-.cli-toast-title { font: 700 11.5px var(--f-ui); color: var(--tx); }
-.cli-toast-detail { font: 500 10px var(--f-mono); color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cli-toast-title { font: 700 11px/1.3 var(--f-ui); color: var(--tx-primary); }
+.cli-toast-detail { font: 400 9.5px/1.4 var(--f-mono); color: var(--tx-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cli-toast-dismiss { background: transparent; border: none; font-size: 14px; line-height: 1; cursor: pointer; color: var(--dim); }
 
 /* Settings - alert threshold steppers */
