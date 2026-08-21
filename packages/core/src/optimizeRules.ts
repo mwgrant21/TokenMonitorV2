@@ -122,9 +122,15 @@ function findUncappedBashOutput(events: TranscriptEvent[], windowMs: number): Op
       //   TokenMonitor -> e._rawResultLength   (per EVENT; double-counts when an
       //                                         event carries more than one result)
       // Both suites were green because each only ever saw its own shape. Core
-      // prefers the per-result field and falls back to the legacy event-level one
-      // so TokenMonitor keeps working unchanged. Remove the fallback once
-      // TokenMonitor's transcriptParser emits resultLength per tool result.
+      // prefers the per-result field and falls back to the legacy event-level one.
+      //
+      // 2026-08-21: TokenMonitor's transcriptParser now emits resultLength on every
+      // tool result (always a number, 0 included), so `??` never reaches the fallback
+      // from this app, and `_rawResultLength` exists in neither consumer - it is dead.
+      // It is kept only because deleting it changes core's contract for a producer
+      // that sets the event-level field and nothing else, and Aether OS is not yet
+      // wired to this package, so that cannot be verified from here. Delete it as
+      // part of wiring Aether OS to packages/core.
       const legacyEventLength = (e as { _rawResultLength?: number })._rawResultLength;
       const resultLength = result.resultLength ?? legacyEventLength ?? 0;
       if (resultLength > BASH_OUTPUT_SIZE_THRESHOLD && !PAGINATION_HINTS.test(command)) {
