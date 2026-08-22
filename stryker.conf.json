@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "packageManager": "npm",
+  "testRunner": "command",
+  "commandRunner": {
+    "command": "npm test --workspace @tokenmonitor/core"
+  },
+  "mutate": ["packages/core/src/**/*.ts"],
+  "ignorePatterns": ["node_modules/**", "packages/core/dist/**", "dist/**"],
+  "reporters": ["clear-text", "json"],
+  "coverageAnalysis": "off"
+}

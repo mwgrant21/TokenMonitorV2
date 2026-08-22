@@ -7,3 +7,5 @@ out/
 *.log
 codesign/
 secrets/
+.stryker-tmp/
+reports/
