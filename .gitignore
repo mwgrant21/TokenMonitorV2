@@ -4,6 +4,7 @@ out/
 *.tsbuildinfo
 .env
 .worktrees/
+.claude/worktrees/
 *.log
 codesign/
 secrets/
