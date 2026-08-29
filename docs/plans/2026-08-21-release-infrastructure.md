@@ -119,20 +119,20 @@ copy button did not.
 
 Convergence plan step 4. Rides the file share that already exists; no server, no network call.
 
-- [ ] **Step 1: Write the failing tests** - appVersion present in the snapshot written by
+- [x] **Step 1: Write the failing tests** - appVersion present in the snapshot written by
       `fleetSnapshotWriter.js`, and a pure `versionSpread(seats)` in `fleetAggregator.js` returning
       the distribution plus a behind-count.
-- [ ] **Step 2: Run them and confirm both fail.**
-- [ ] **Step 3: Add appVersion to `writeFleetSnapshot()`** from buildInfo, not `app.getVersion()`.
-- [ ] **Step 4: Add `versionSpread`** and surface a version column plus an N-seats-behind chip in
+- [x] **Step 2: Run them and confirm both fail.**
+- [x] **Step 3: Add appVersion to `writeFleetSnapshot()`** from buildInfo, not `app.getVersion()`.
+- [x] **Step 4: Add `versionSpread`** and surface a version column plus an N-seats-behind chip in
       the Team view.
-- [ ] **Step 5: Handle the compatibility case** - snapshots from older seats carry no appVersion
+- [x] **Step 5: Handle the compatibility case** - snapshots from older seats carry no appVersion
       and must render as unknown, not as a version.
-- [ ] **Step 6: Run the full suite.**
-- [ ] **Step 7: Verify live against a temp fleet folder.** NOTE: `fleet:connect` persists to the
+- [x] **Step 6: Run the full suite.**
+- [x] **Step 7: Verify live against a temp fleet folder.** NOTE: `fleet:connect` persists to the
       real `~/.claude-token-tracker/ui.json` - back it up first and restore after, or the app is
       left pointing at a folder that no longer exists.
-- [ ] **Step 8: Commit.**
+- [x] **Step 8: Commit.**
 
 ---
 

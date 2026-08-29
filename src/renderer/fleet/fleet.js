@@ -69,15 +69,43 @@ function renderTotals(state) {
       <span>Avg cache <b>${pct(t.avgCacheHitRate)}</b></span>
       <span>Avg 1-shot <b>${pct(t.avgOneShotRate)}</b></span>
       <span>${t.reporting} reporting</span>
+      ${renderVersionChip(state)}
     </div>`;
 }
 
+// Silence when the fleet agrees with itself: a chip that is always present stops being
+// read. It appears only when seats actually disagree, and counts only seats we can
+// place -- 'unknown' seats are reported separately rather than folded into a
+// behind-count they might not belong in.
+function renderVersionChip(state) {
+  const v = state.versions;
+  if (!v || (!v.behind && !v.unknown)) return '';
+  const parts = [];
+  if (v.behind) parts.push(`${v.behind} seat${v.behind === 1 ? '' : 's'} behind`);
+  if (v.unknown) parts.push(`${v.unknown} unknown`);
+  return `<span class="fleet-version-chip${v.behind ? ' behind' : ''}">${parts.join(' · ')}</span>`;
+}
+
+// A seat's version cell. A snapshot written before seats reported a version has no
+// appVersion at all, and buildInfo reports 'unknown' on a dev run -- both render as
+// 'unknown' rather than as a number, because a plausible-looking version for a seat we
+// cannot identify is worse than an obvious gap.
+function seatVersionCell(seat, newest) {
+  const raw = seat && seat.appVersion;
+  const version = typeof raw === 'string' && raw && raw !== 'unknown' ? raw : null;
+  if (!version) return '<td class="seat-version unknown">unknown</td>';
+  const behind = newest && version !== newest;
+  return `<td class="seat-version${behind ? ' behind' : ''}">${escapeHtml(version)}</td>`;
+}
+
 function renderSeats(state) {
+  const newest = state.versions ? state.versions.newest : null;
   const rows = (state.seats || [])
     .map(
       (seat) => `
       <tr class="${seat.stale ? 'stale' : ''}">
         <td>${escapeHtml(seat.username)}</td>
+        ${seatVersionCell(seat, newest)}
         <td>${fmtMoney(seat.spend)}</td>
         <td>${Math.round((seat.cacheHitRate || 0) * 100)}%</td>
         <td>${seat.oneShotRate == null ? '--' : Math.round(seat.oneShotRate * 100) + '%'}</td>
@@ -88,7 +116,7 @@ function renderSeats(state) {
     .join('');
   return `
     <table class="fleet-table">
-      <thead><tr><th>Engineer</th><th>Spend</th><th>Cache</th><th>1-shot</th><th>Agents</th><th>Status</th></tr></thead>
+      <thead><tr><th>Engineer</th><th>Version</th><th>Spend</th><th>Cache</th><th>1-shot</th><th>Agents</th><th>Status</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
 }

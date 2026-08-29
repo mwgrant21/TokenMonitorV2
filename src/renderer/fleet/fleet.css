@@ -5,6 +5,15 @@
 .fleet-table th { text-align: left; font: 700 9px var(--f-mono); text-transform: uppercase; background: var(--panel2); padding: 8px 12px; }
 .fleet-table td { padding: 8px 12px; border-bottom: 1px solid var(--bd); font: 500 12px var(--f-mono); }
 .fleet-table tr.stale { color: var(--dim); }
+/* Version column + the N-seats-behind chip. 'behind' borrows --warn, the same token the
+   footer's update chip uses for the same fact about this machine, so one visual language
+   covers "you are behind" and "your team is behind". A seat we cannot place is dimmed,
+   not warned about: unknown is not a problem, it is an absence of information. */
+.fleet-table td.seat-version { color: var(--tx); }
+.fleet-table td.seat-version.behind { color: var(--warn); }
+.fleet-table td.seat-version.unknown { color: var(--tx-muted); font-style: italic; }
+.fleet-version-chip { margin-left: auto; font: 700 9px/1.6 var(--f-ui); letter-spacing: 1px; text-transform: uppercase; color: var(--tx-muted); border: 1px solid currentColor; border-radius: var(--r-chip); padding: 2px 8px; }
+.fleet-version-chip.behind { color: var(--warn); }
 
 .fleet-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; position: relative; }
 .fleet-toolbar { display: flex; align-items: center; gap: 10px; }

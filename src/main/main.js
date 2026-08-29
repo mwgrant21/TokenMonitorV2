@@ -12,7 +12,7 @@ const { scanAllProjects } = require('./historyScanner');
 const { readFleetSnapshots } = require('./fleetSnapshotReader');
 const { writeFleetSnapshot } = require('./fleetSnapshotWriter');
 const { loadUiConfig, saveUiConfig } = require('../shared/uiConfig');
-const { seatsChipCounts, teamWaste, deptTotals } = require('../shared/fleetAggregator');
+const { seatsChipCounts, teamWaste, deptTotals, versionSpread } = require('../shared/fleetAggregator');
 const { createUsageScraper } = require('./usageScraper');
 const { computeVersionStatus } = require('./versionStatus');
 const { readBuildInfo } = require('../shared/buildInfo');
@@ -278,6 +278,7 @@ ipcMain.handle('fleet:getState', async () => {
       chip: seatsChipCounts(raw.seats),
       waste: teamWaste(raw.seats),
       totals: deptTotals(raw.seats),
+      versions: versionSpread(raw.seats),
     };
   } catch {
     return { connected: false, seats: [], error: true, folder: fleetFolderPath };
@@ -287,12 +288,12 @@ ipcMain.handle('fleet:getState', async () => {
 // Write this seat's own snapshot every 5 minutes and on quit, once a folder is chosen.
 setInterval(() => {
   if (fleetFolderPath) {
-    writeFleetSnapshot({ folderPath: fleetFolderPath, username: os.userInfo().username, liveAggregator, historyAggregator, historyEvents }).catch(() => {});
+    writeFleetSnapshot({ folderPath: fleetFolderPath, username: os.userInfo().username, appVersion: buildInfo.version, liveAggregator, historyAggregator, historyEvents }).catch(() => {});
   }
 }, 5 * 60 * 1000);
 
 app.on('before-quit', () => {
   if (fleetFolderPath) {
-    writeFleetSnapshot({ folderPath: fleetFolderPath, username: os.userInfo().username, liveAggregator, historyAggregator, historyEvents }).catch(() => {});
+    writeFleetSnapshot({ folderPath: fleetFolderPath, username: os.userInfo().username, appVersion: buildInfo.version, liveAggregator, historyAggregator, historyEvents }).catch(() => {});
   }
 });
