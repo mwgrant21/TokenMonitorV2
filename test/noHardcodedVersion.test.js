@@ -58,6 +58,25 @@ const ALLOWLIST = [
       'Same example latest.json payload as latestVersionReader.js, shown to whoever has to hand-publish that file.',
   },
 
+  {
+    file: 'docs/RELEASE.md',
+    literal: '2.0.0-alpha.0',
+    reason:
+      'Worked example of the prerelease-channel bump rule in the release runbook. The whole point of the line is that these three specific numbers relate to each other; genericising them deletes the explanation. Listed literal by literal rather than exempting the file, so a real version claim added to the runbook later is still caught.',
+  },
+  {
+    file: 'docs/RELEASE.md',
+    literal: '2.0.0-alpha.1',
+    reason:
+      'Worked example of the prerelease-channel bump rule in the release runbook. The whole point of the line is that these three specific numbers relate to each other; genericising them deletes the explanation. Listed literal by literal rather than exempting the file, so a real version claim added to the runbook later is still caught.',
+  },
+  {
+    file: 'docs/RELEASE.md',
+    literal: '2.0.0',
+    reason:
+      'Worked example of the prerelease-channel bump rule in the release runbook. The whole point of the line is that these three specific numbers relate to each other; genericising them deletes the explanation. Listed literal by literal rather than exempting the file, so a real version claim added to the runbook later is still caught.',
+  },
+
   // --- Dated records: history, not state. Bumping these would falsify them. ---
   {
     file: 'docs/follow-ups.md',

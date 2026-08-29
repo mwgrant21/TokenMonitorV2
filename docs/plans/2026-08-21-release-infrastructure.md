@@ -140,18 +140,18 @@ Convergence plan step 4. Rides the file share that already exists; no server, no
 
 The point of the plan. Blocked on the signing decision above.
 
-- [ ] **Step 1: Resolve signing** - transport the existing `.pfx`, or generate a new pair knowing
+- [x] **Step 1: Resolve signing** - transport the existing `.pfx`, or generate a new pair knowing
       it changes the publisher identity.
-- [ ] **Step 2: Write `latest.json` as part of cutting a build** - the producer for the reader that
+- [x] **Step 2: Write `latest.json` as part of cutting a build** - the producer for the reader that
       has been live since 2026-08-13. One file into the fleet share.
-- [ ] **Step 3: Run `npm run dist` end to end** and install the result on this machine.
-- [ ] **Step 4: Re-grant the AppContainer ACE** on the unpacked and installed directories.
+- [x] **Step 3: Run `npm run dist` end to end** and install the result on this machine.
+- [x] **Step 4: Re-grant the AppContainer ACE** on the unpacked and installed directories.
       `npm run dist` drops it, and without it Electron dies with exit code -1073741515.
-- [ ] **Step 5: Verify the installed build** reports the generated version, and that a seat pointed
+- [x] **Step 5: Verify the installed build** reports the generated version, and that a seat pointed
       at a share carrying a higher `latest.json` shows the UPDATE AVAILABLE chip.
-- [ ] **Step 6: Write `docs/RELEASE.md`** - the runbook, including the ACE re-grant and the
+- [x] **Step 6: Write `docs/RELEASE.md`** - the runbook, including the ACE re-grant and the
       `latest.json` drop. Both are easy to forget and silent when missed.
-- [ ] **Step 7: Commit.**
+- [x] **Step 7: Commit.**
 
 ---
 
