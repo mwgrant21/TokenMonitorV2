@@ -37,10 +37,24 @@ function compareVersions(a, b) {
 // 'unknown' is deliberately its own state and must never render as 'current':
 // a missing or malformed latest.json means we do not know, and silently
 // claiming "up to date" is exactly the failure mode this feature exists to avoid.
+// Is this version carrying a prerelease tag? This is what buildInfo's `channel` is
+// derived from, and the one place the tag changes an answer rather than just labelling
+// one.
+function isPrerelease(value) {
+  return typeof value === 'string' && /^\s*v?\d+(\.\d+){0,2}-/.test(value);
+}
+
 function deriveVersionStatus(current, latest) {
   const cmp = compareVersions(current, latest);
   if (cmp === null) {
     return { state: 'unknown', current: current || null, latest: latest || null, behindBy: null };
+  }
+  // Same numbers, but one side is a prerelease of the other. compareVersions ignores
+  // the tag for ordering, so without this an alpha seat is told it is up to date on the
+  // day the stable build of that number ships -- the one moment the check exists for.
+  // Only in that direction: a stable build is not behind a beta of the same number.
+  if (cmp === 0 && isPrerelease(current) && !isPrerelease(latest)) {
+    return { state: 'behind', current, latest, behindBy: 'prerelease' };
   }
   if (cmp >= 0) {
     return { state: 'current', current, latest, behindBy: null };
@@ -53,4 +67,4 @@ function deriveVersionStatus(current, latest) {
   return { state: 'behind', current, latest, behindBy };
 }
 
-module.exports = { parseVersion, compareVersions, deriveVersionStatus };
+module.exports = { parseVersion, compareVersions, deriveVersionStatus, isPrerelease };

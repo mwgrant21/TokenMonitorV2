@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { buildBuildInfo, BUILD_INFO_FILENAME } = require('../src/shared/buildInfo');
 const { bumpArgs } = require('./bumpArgs');
+const { buildLatestJson } = require('./latestJson');
 
 const codesignDir = path.join(__dirname, '..', 'codesign');
 const pfxPasswordFile = path.join(codesignDir, 'pfx-password.txt');
@@ -53,6 +54,17 @@ function writeBuildInfo() {
   return info;
 }
 
+// Dropped into dist/ beside the installer, not onto a share: the share path is
+// per-deployment. Copying it across is the documented last step of cutting a build,
+// and it is the step that makes every other seat notice the new version exists.
+function writeLatestJson(info) {
+  const target = path.join(__dirname, '..', 'dist', 'latest.json');
+  const payload = buildLatestJson({ version: info.version, builtAt: info.builtAt });
+  fs.writeFileSync(target, JSON.stringify(payload, null, 2) + '\n', 'utf8');
+  console.log(`Wrote dist/latest.json: ${payload.version} (published ${payload.published})`);
+  console.log('Copy it to the fleet share to publish this build -- see docs/RELEASE.md.');
+}
+
 function requireFile(file, help) {
   if (!fs.existsSync(file)) {
     console.error(`Missing required file: ${file}\n${help}`);
@@ -74,7 +86,7 @@ async function main() {
   };
 
   bumpAndTag();
-  writeBuildInfo();
+  const info = writeBuildInfo();
 
   const args = ['electron-builder'];
 
@@ -83,6 +95,10 @@ async function main() {
     shell: true,
     env,
   });
+
+  // Only after a build that actually succeeded: a latest.json announcing a version
+  // whose installer does not exist would point the whole fleet at nothing.
+  if (result.status === 0) writeLatestJson(info);
 
   process.exit(result.status ?? 1);
 }

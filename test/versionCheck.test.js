@@ -52,3 +52,27 @@ test('deriveVersionStatus: unknown is distinct from current and never masquerade
     assert.equal(s.behindBy, null);
   }
 });
+
+// --- Channel behaviour: a prerelease is not the release it is a prerelease of ---
+// This is what buildInfo's `channel` field drives. Without it, deriveVersionStatus
+// strips the tag for ordering and tells an alpha seat it is up to date the day the
+// stable build of the same number ships -- the one moment it most needs telling.
+test('a prerelease is behind the stable release of the same number', () => {
+  const status = deriveVersionStatus('2.0.0-alpha.0', '2.0.0');
+  assert.equal(status.state, 'behind');
+  assert.equal(status.behindBy, 'prerelease');
+});
+
+test('a prerelease is not behind itself', () => {
+  assert.equal(deriveVersionStatus('2.0.0-alpha.0', '2.0.0-alpha.0').state, 'current');
+});
+
+test('a stable build is not behind a prerelease of the same number', () => {
+  assert.equal(deriveVersionStatus('2.0.0', '2.0.0-beta.1').state, 'current');
+});
+
+test('a real version gap still outranks the prerelease rule', () => {
+  const status = deriveVersionStatus('2.0.0-alpha.0', '2.1.0');
+  assert.equal(status.state, 'behind');
+  assert.equal(status.behindBy, 'minor');
+});
