@@ -15,6 +15,7 @@ const { loadUiConfig, saveUiConfig } = require('../shared/uiConfig');
 const { seatsChipCounts, teamWaste, deptTotals } = require('../shared/fleetAggregator');
 const { createUsageScraper } = require('./usageScraper');
 const { computeVersionStatus } = require('./versionStatus');
+const { readBuildInfo } = require('../shared/buildInfo');
 
 const UI_CONFIG_PATH = path.join(os.homedir(), '.claude-token-tracker', 'ui.json');
 
@@ -216,19 +217,24 @@ ipcMain.on('pty:resize', (event, { cols, rows }) => {
   if (activePty) activePty.resize(cols, rows);
 });
 
+// Read once at startup, not per request: the file is written at dist time and cannot
+// change under a running app. A dev run has no generated file and reports 'unknown',
+// which is the honest answer -- app.getVersion() used to report the tree's package.json
+// version here, which is a real version number for a build that was never cut.
+const buildInfo = readBuildInfo();
+
 // Running app version for the footer's version chip / settings About row.
-// Reads package.json via Electron's own app.getVersion() -- no new file needed.
-ipcMain.handle('app:version', () => app.getVersion());
+ipcMain.handle('app:version', () => buildInfo.version);
 
 let fleetFolderPath = null;
 
 // Cached, not read-on-request: the periodic tick above refreshes it, so a
 // renderer poll never blocks on an SMB read. Starts 'unknown' rather than
 // guessing 'current' before the first tick has had a chance to check.
-let versionStatus = { state: 'unknown', current: app.getVersion(), latest: null, behindBy: null };
+let versionStatus = { state: 'unknown', current: buildInfo.version, latest: null, behindBy: null };
 
 async function refreshVersionStatus() {
-  versionStatus = await computeVersionStatus(app.getVersion(), fleetFolderPath);
+  versionStatus = await computeVersionStatus(buildInfo.version, fleetFolderPath);
 }
 
 ipcMain.handle('version:getStatus', () => versionStatus);

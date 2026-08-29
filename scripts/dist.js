@@ -1,10 +1,28 @@
 const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const { buildBuildInfo, BUILD_INFO_FILENAME } = require('../src/shared/buildInfo');
 
-const secretsDir = path.join(__dirname, '..', 'secrets');
 const codesignDir = path.join(__dirname, '..', 'codesign');
 const pfxPasswordFile = path.join(codesignDir, 'pfx-password.txt');
+
+// The commit the build was cut from. A checkout without git history still builds --
+// buildBuildInfo normalizes the miss to 'unknown' rather than inventing a sha.
+function currentCommit() {
+  const result = spawnSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' });
+  return result.status === 0 ? result.stdout : undefined;
+}
+
+// Written before electron-builder runs so the generated file is on disk in time to be
+// collected by the files list. Generated, never committed: a committed copy is a semver
+// literal in the tree by another name.
+function writeBuildInfo() {
+  const info = buildBuildInfo({ commit: currentCommit() });
+  const target = path.join(__dirname, '..', BUILD_INFO_FILENAME);
+  fs.writeFileSync(target, JSON.stringify(info, null, 2) + '\n', 'utf8');
+  console.log(`Wrote ${BUILD_INFO_FILENAME}: ${info.version} (${info.commit}, ${info.channel})`);
+  return info;
+}
 
 function requireFile(file, help) {
   if (!fs.existsSync(file)) {
@@ -22,6 +40,8 @@ async function main() {
       'Run scripts/generate-codesign-cert.ps1 to create a matched cert + password.'
     ),
   };
+
+  writeBuildInfo();
 
   const args = ['electron-builder'];
 

@@ -10,3 +10,4 @@ codesign/
 secrets/
 .stryker-tmp/
 reports/
+buildInfo.json

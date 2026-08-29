@@ -50,25 +50,25 @@ convergence plan puts this first because steps 3, 4 and 5 all depend on it, and 
 
 Convergence plan step 2. Everything downstream consumes this.
 
-- [ ] **Step 1: Write the failing test** - `test/buildInfo.test.js`: the generator produces
+- [x] **Step 1: Write the failing test** - `test/buildInfo.test.js`: the generator produces
       version, commit, builtAt and channel; version matches `package.json`; commit is a short sha;
       builtAt parses as a date. Pure logic, no Electron.
-- [ ] **Step 2: Run it and confirm it fails** for the right reason - module absent, not a typo.
-- [ ] **Step 3: Add `src/shared/buildInfo.js`** - a pure builder plus a reader returning a
+- [x] **Step 2: Run it and confirm it fails** for the right reason - module absent, not a typo.
+- [x] **Step 3: Add `src/shared/buildInfo.js`** - a pure builder plus a reader returning a
       documented `unknown` shape when the file is absent. The `unknown` case matters: a dev run has
       no generated file and must not render a plausible-but-wrong version. `latestVersionReader.js`
       already sets this precedent - a missing file renders `unknown`, never up-to-date.
-- [ ] **Step 4: Have `scripts/dist.js` write it** before invoking electron-builder, and add it to
+- [x] **Step 4: Have `scripts/dist.js` write it** before invoking electron-builder, and add it to
       the files list in `electron-builder.yml` so it ships.
-- [ ] **Step 5: Replace `app.getVersion()`** at `src/main/main.js:221`, `:228` and `:231` - the
+- [x] **Step 5: Replace `app.getVersion()`** at `src/main/main.js:221`, `:228` and `:231` - the
       `app:version` handler, the versionStatus seed, and the 60s recompute. Those three are the
       whole surface today.
-- [ ] **Step 6: Add `buildInfo.json` to `.gitignore`.**
-- [ ] **Step 7: Run the test, then the full suite.**
-- [ ] **Step 8: Verify live** - launch and confirm the footer chip shows the generated version
+- [x] **Step 6: Add `buildInfo.json` to `.gitignore`.**
+- [x] **Step 7: Run the test, then the full suite.**
+- [x] **Step 8: Verify live** - launch and confirm the footer chip shows the generated version
       rather than `unknown`; then delete the file, relaunch, and confirm it degrades to `unknown`
       rather than to a wrong number.
-- [ ] **Step 9: Commit.**
+- [x] **Step 9: Commit.**
 
 ---
 
