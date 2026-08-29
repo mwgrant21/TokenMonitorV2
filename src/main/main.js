@@ -11,6 +11,7 @@ const { UsageAggregator } = require('../shared/aggregator');
 const { scanAllProjects } = require('./historyScanner');
 const { readFleetSnapshots } = require('./fleetSnapshotReader');
 const { writeFleetSnapshot } = require('./fleetSnapshotWriter');
+const { flushWithDeadline } = require('./quitFlush');
 const { loadUiConfig, saveUiConfig } = require('../shared/uiConfig');
 const { seatsChipCounts, teamWaste, deptTotals, versionSpread } = require('../shared/fleetAggregator');
 const { createUsageScraper } = require('./usageScraper');
@@ -292,8 +293,31 @@ setInterval(() => {
   }
 }, 5 * 60 * 1000);
 
-app.on('before-quit', () => {
-  if (fleetFolderPath) {
-    writeFleetSnapshot({ folderPath: fleetFolderPath, username: os.userInfo().username, appVersion: buildInfo.version, liveAggregator, historyAggregator, historyEvents }).catch(() => {});
-  }
+// The final snapshot has to actually land. Firing the write and returning let the
+// process exit mid-write, losing this seat's last spend figures and -- since the fleet
+// version column shipped -- its app version, which is how a seat silently reads as
+// 'unknown' to the rest of the team.
+//
+// So quit is deferred until the write settles. Bounded, because the fleet folder is a
+// network share and an unreachable one must not leave the app unquittable: past the
+// deadline we give up and quit anyway, having said so. A lost snapshot is a stale row
+// in the Team view; an app that will not close is a support call.
+const QUIT_FLUSH_TIMEOUT_MS = 3000;
+let quitFlushStarted = false;
+
+app.on('before-quit', (event) => {
+  if (!fleetFolderPath || quitFlushStarted) return;
+  quitFlushStarted = true;
+  // Set before app.quit() below, so the second pass through this handler falls straight
+  // through rather than deferring the quit again.
+  event.preventDefault();
+  flushWithDeadline(
+    () => writeFleetSnapshot({ folderPath: fleetFolderPath, username: os.userInfo().username, appVersion: buildInfo.version, liveAggregator, historyAggregator, historyEvents }),
+    QUIT_FLUSH_TIMEOUT_MS
+  ).then((outcome) => {
+    if (outcome !== 'written') {
+      console.warn(`Final fleet snapshot not written on quit (${outcome}); this seat's row will read stale.`);
+    }
+    app.quit();
+  });
 });
