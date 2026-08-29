@@ -1,6 +1,6 @@
 {
   "name": "tokenmonitor-v2",
-  "version": "2.0.0-alpha.0",
+  "version": "2.0.0-alpha.1",
   "private": true,
   "description": "Claude Token Tracker v2 — department build. Shared core logic, version readout, and the v2 design system.",
   "author": "Matt Grant",
