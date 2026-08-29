@@ -72,6 +72,16 @@ body {
 }
 #footer-version-pop-current { font: 600 13px var(--f-mono); color: var(--tx); }
 #footer-version-pop-meta { color: var(--dim); margin-top: 6px; }
+/* COPY VERSION INFO, in both the footer popover and the Settings About block. Borrows
+   #settings-replay-btn's shape so the two panels do not look like different products;
+   the uppercase label matches the convergence plan's naming of the control. */
+.version-copy-btn {
+  display: block; width: 100%; margin-top: 10px;
+  background: transparent; border: 1px solid var(--bd); color: var(--dim);
+  border-radius: 6px; padding: 6px 10px; cursor: pointer;
+  font: 700 9px/1.6 var(--f-ui); letter-spacing: 1px;
+}
+.version-copy-btn:hover { color: var(--tx); border-color: var(--tx-muted); }
 
 .hero-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; padding: 22px 24px 0; }
 .hero-tile { background: var(--panel-grad); border: 1px solid var(--panel-bd); border-radius: var(--r-panel); box-shadow: 0 1px 0 var(--acc-wash) inset, 0 10px 30px rgba(0, 0, 0, .28); padding: 15px 17px; position: relative; overflow: hidden; }

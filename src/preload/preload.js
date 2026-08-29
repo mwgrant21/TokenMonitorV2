@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld('tokenTracker', {
   app: {
     getVersion: () => ipcRenderer.invoke('app:version'),
     versionStatus: () => ipcRenderer.invoke('version:getStatus'),
+    versionInfoLine: () => ipcRenderer.invoke('app:versionInfoLine'),
   },
   pty: {
     start: (opts) => ipcRenderer.invoke('pty:start', opts),

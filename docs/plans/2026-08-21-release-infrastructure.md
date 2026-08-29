@@ -105,13 +105,13 @@ copy button did not.
       asserting the product name is IN the string. The convergence plan is explicit about why: the
       failure mode is a user reading back the Claude Code version by mistake, so the pasted line
       has to say which product it is.
-- [ ] **Step 2: Run it and confirm it fails.**
-- [ ] **Step 3: Implement the helper in `src/shared/`** - pure, no Electron.
-- [ ] **Step 4: Add the button** to the footer version popover and the Settings block, using the
+- [x] **Step 2: Run it and confirm it fails.**
+- [x] **Step 3: Implement the helper in `src/shared/`** - pure, no Electron.
+- [x] **Step 4: Add the button** to the footer version popover and the Settings block, using the
       existing clipboard bridge.
-- [ ] **Step 5: Run the full suite.**
-- [ ] **Step 6: Verify live** - click it, paste it, and read it as if someone had sent it to you.
-- [ ] **Step 7: Commit.**
+- [x] **Step 5: Run the full suite.**
+- [x] **Step 6: Verify live** - click it, paste it, and read it as if someone had sent it to you.
+- [x] **Step 7: Commit.**
 
 ---
 

@@ -113,6 +113,46 @@
     else closeVersionPopover();
   }
 
+  // COPY VERSION INFO. The line itself is composed in main (src/shared/versionInfoLine.js)
+  // because seat and OS live on that side; the renderer only moves it to the clipboard.
+  //
+  // The label reports what happened. A copy button that looks identical whether or not
+  // the clipboard write succeeded is the worst version of this feature: the user walks
+  // away believing they have the line, pastes nothing, and the support conversation
+  // starts over.
+  const COPY_LABEL = 'COPY VERSION INFO';
+  const COPY_FEEDBACK_MS = 1400;
+
+  function flashCopyLabel(btn, text) {
+    btn.textContent = text;
+    setTimeout(() => { btn.textContent = COPY_LABEL; }, COPY_FEEDBACK_MS);
+  }
+
+  // The bridge is a parameter, not a hard reference to window.tokenTracker, purely so the
+  // failure path can be exercised. contextBridge freezes what it exposes, so with the
+  // global inlined there is no way to make the clipboard write fail on purpose -- and an
+  // error branch nobody has ever run is a guess, not a behaviour.
+  async function copyVersionInfo(btn, bridge = window.tokenTracker) {
+    if (!btn || !bridge || !bridge.app || !bridge.clipboard) return;
+    try {
+      const line = await bridge.app.versionInfoLine();
+      await bridge.clipboard.write(line);
+      flashCopyLabel(btn, 'COPIED');
+    } catch (e) {
+      flashCopyLabel(btn, 'COPY FAILED');
+    }
+  }
+
+  // Both copies of the button behave identically: a user hunting for their version
+  // opens whichever of the two panels they found first, and neither should be the one
+  // that does less.
+  function mountCopyButtons() {
+    for (const id of ['footer-version-copy', 'settings-version-copy']) {
+      const btn = document.getElementById(id);
+      if (btn) btn.addEventListener('click', () => copyVersionInfo(btn));
+    }
+  }
+
   function mountVersionCheck() {
     const btn = document.getElementById('footer-version');
     const chip = document.getElementById('footer-update-chip');
@@ -160,8 +200,9 @@
   function mount() {
     renderVersion();
     mountVersionCheck();
+    mountCopyButtons();
   }
 
   window.TT = window.TT || {};
-  window.TT.footer = { mount, render, renderFleet, refreshVersionStatus };
+  window.TT.footer = { mount, render, renderFleet, refreshVersionStatus, copyVersionInfo };
 })();

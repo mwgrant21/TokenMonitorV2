@@ -16,6 +16,7 @@ const { seatsChipCounts, teamWaste, deptTotals } = require('../shared/fleetAggre
 const { createUsageScraper } = require('./usageScraper');
 const { computeVersionStatus } = require('./versionStatus');
 const { readBuildInfo } = require('../shared/buildInfo');
+const { versionInfoLine } = require('../shared/versionInfoLine');
 
 const UI_CONFIG_PATH = path.join(os.homedir(), '.claude-token-tracker', 'ui.json');
 
@@ -225,6 +226,21 @@ const buildInfo = readBuildInfo();
 
 // Running app version for the footer's version chip / settings About row.
 ipcMain.handle('app:version', () => buildInfo.version);
+
+// The one-line readout behind COPY VERSION INFO. Composed here rather than in the
+// renderer because seat and OS live on this side; versionInfoLine itself is pure and
+// takes them as arguments. os.version() gives the marketing name ('Windows 11 Home'),
+// which is what a person reading the pasted line expects to see -- os.release() would
+// hand them a build number to decode.
+ipcMain.handle('app:versionInfoLine', () =>
+  versionInfoLine({
+    version: buildInfo.version,
+    commit: buildInfo.commit,
+    builtAt: buildInfo.builtAt,
+    seat: os.userInfo().username,
+    os: os.version(),
+  })
+);
 
 let fleetFolderPath = null;
 
