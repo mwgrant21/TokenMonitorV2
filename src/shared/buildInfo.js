@@ -8,8 +8,9 @@
 // It cannot tell you which commit you are looking at, and it cannot tell you that it
 // does not know. A generated file can do both.
 //
-// Shape:
-//   { "version": "2.0.0-alpha.0", "commit": "a3f9c21",
+// Shape (the version is package.json's, whatever it is at build time -- writing a real
+// one here would be the very duplication this file exists to remove):
+//   { "version": "<semver>", "commit": "a3f9c21",
 //     "builtAt": "2026-08-29T20:21:00.000Z", "channel": "alpha" }
 const fs = require('node:fs');
 const path = require('node:path');

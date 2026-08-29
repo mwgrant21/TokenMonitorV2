@@ -76,16 +76,18 @@ Convergence plan step 2. Everything downstream consumes this.
 
 Convergence plan step 5.
 
-- [ ] **Step 1: Write the failing test** - `test/noHardcodedVersion.test.js`: no semver literal in
+- [x] **Step 1: Write the failing test** - `test/noHardcodedVersion.test.js`: no semver literal in
       `src/`, `docs/`, the README or `CLAUDE.md`. Expect real hits and triage each; some will be
       legitimate prose about past versions and need an explicit allowlist with a written reason, so
       that being exempt is a decision someone made rather than a pattern that happened not to match.
-- [ ] **Step 2: Run it and record what it finds** before changing anything.
-- [ ] **Step 3: Add `standard-version`.** The repo already uses conventional commit prefixes
+- [x] **Step 2: Run it and record what it finds** before changing anything.
+- [x] **Step 3: Add `standard-version`.** SUBSTITUTED: `commit-and-tag-version`, its
+      maintained fork -- `standard-version` was sunset upstream, last published 2023-04-01.
+      Same CLI, same config. The repo already uses conventional commit prefixes
       consistently, so the input exists.
-- [ ] **Step 4: Make `npm run dist` bump, tag, then build** - no hand-edited number anywhere.
-- [ ] **Step 5: Fix or allowlist every hit from Step 2.**
-- [ ] **Step 6: Run the full suite.**
+- [x] **Step 4: Make `npm run dist` bump, tag, then build** - no hand-edited number anywhere.
+- [x] **Step 5: Fix or allowlist every hit from Step 2.**
+- [x] **Step 6: Run the full suite.**
 - [ ] **Step 7: Verify** by running the bump on a scratch branch, reading the changelog and tag as
       if handing them to someone, then resetting the branch.
 - [ ] **Step 8: Commit.**
@@ -97,7 +99,7 @@ Convergence plan step 5.
 Convergence plan step 3's remainder. The footer chip and Settings mirror shipped 2026-08-13; the
 copy button did not.
 
-- [ ] **Step 1: Write the failing test** - a pure `versionInfoLine()` producing one clipboard line,
+- [x] **Step 1: Write the failing test** - a pure `versionInfoLine()` producing one clipboard line,
       asserting the product name is IN the string. The convergence plan is explicit about why: the
       failure mode is a user reading back the Claude Code version by mistake, so the pasted line
       has to say which product it is.

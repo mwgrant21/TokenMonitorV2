@@ -430,8 +430,8 @@ body {
    a critical alert's toast in the healthy colour. --alarm-glow is likewise frozen
    (rgba(59,224,160,.5), no light-mode variant), so the glow follows the same tokens as the row.
    alerts.js puts the severity class on the icon, not the container, hence :has() - Chromium
-   supports it from 105 and this app pins Electron 43.4.1, whose bundled Chromium is well past
-   that floor. */
+   supports it from 105 and the Electron version this app pins (see package.json) bundles a
+   Chromium well past that floor. */
 #cli-toast { position: absolute; left: 10px; right: 22px; bottom: 10px; z-index: 5; display: flex; align-items: center; gap: 9px; background: var(--panel-grad); border: 1px solid var(--panel-bd); border-left: 3px solid var(--warn); border-radius: 12px; padding: 10px 12px; box-shadow: 0 0 24px -8px var(--warn); }
 #cli-toast:has(.cli-toast-icon.critical) { border-left-color: var(--danger); box-shadow: 0 0 24px -8px var(--danger); }
 .cli-toast-icon { font-size: 14px; line-height: 1; color: var(--warn); }
