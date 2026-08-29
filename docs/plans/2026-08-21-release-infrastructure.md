@@ -88,9 +88,11 @@ Convergence plan step 5.
 - [x] **Step 4: Make `npm run dist` bump, tag, then build** - no hand-edited number anywhere.
 - [x] **Step 5: Fix or allowlist every hit from Step 2.**
 - [x] **Step 6: Run the full suite.**
-- [ ] **Step 7: Verify** by running the bump on a scratch branch, reading the changelog and tag as
-      if handing them to someone, then resetting the branch.
-- [ ] **Step 8: Commit.**
+- [x] **Step 7: Verify** by running the bump on a scratch branch, reading the changelog and tag as
+      if handing them to someone, then resetting the branch. Done, and it earned its keep: the
+      first changelog linked every hex colour and CSS selector in a commit body to a nonexistent
+      GitHub issue. Fixed in `.versionrc.js` before the step was called done.
+- [x] **Step 8: Commit.**
 
 ---
 
